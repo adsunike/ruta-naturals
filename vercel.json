@@ -1,12 +1,31 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/create-checkout-session",
-      "destination": "/server.js"
+      "src": "server.js",
+      "use": "@vercel/node"
     },
     {
-      "source": "/webhook",
-      "destination": "/server.js"
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.png",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/create-checkout-session",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/webhook",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
