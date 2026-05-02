@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ruta Naturals — Book a Visit</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --cream: #f4ede1;
+    --cream-deep: #ebe1cf;
+    --sand: #d8c8ad;
+    --sage: #8a9a7b;
+    --sage-deep: #5b6e52;
+    --forest: #2d3a2a;
+    --terracotta: #b8674a;
+    --terracotta-soft: #d49278;
+    --ink: #1f1d18;
+    --ink-soft: #4a463d;
+    --gold: #a88a4a;
+    --pearl: #fbf7ee;
+    --warning: #c47e3a;
+
+    --display: 'Fraunces', Georgia, serif;
+    --serif: 'Cormorant Garamond', serif;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, h4 { font-family: var(--display); font-weight: 300; letter-spacing: -0.01em; }
+  em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.32em;
+    color: var(--sage-deep);
+    font-weight: 500;
+  }
+
+  /* ---------- nav ---------- */
+  nav {
+    padding: 1.4rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(45, 58, 42, 0.08);
+    background: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: var(--ink); }
+  .logo-mark {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--forest);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cream);
+    font-family: var(--display); font-style: italic; font-size: 1.1rem;
+  }
+  .logo-text { font-family: var(--display); font-size: 1.3rem; }
+  .logo-text span { font-style: italic; color: var(--sage-deep); }
+
+  .back-link {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    transition: color 0.3s ease;
+  }
+  .back-link:hover { color: var(--terracotta); }
+
+  /* ---------- progress bar ---------- */
+  .progress {
+    background: var(--pearl);
+    padding: 1.4rem 3rem;
+    border-bottom: 1px solid rgba(45, 58, 42, 0.08);
+  }
+  .progress-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+  }
+  .progress-inner::before {
+    content: '';
+    position: absolute;
+    top: 14px; left: 32px; right: 32px;
+    height: 1px;
+    background: rgba(45, 58, 42, 0.15);
+    z-index: 0;
+  }
+  .progress-step {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.5rem;
+    background: var(--pearl);
+    padding: 0 0.8rem;
+  }
+  .progress-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--cream-deep);
+    border: 1px solid rgba(45, 58, 42, 0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display); font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    transition: all 0.4s ease;
+  }
+  .progress-step.active .progress-dot {
+    background: var(--forest); color: var(--cream); border-color: var(--forest);
+  }
+  .progress-step.done .progress-dot {
+    background: var(--terracotta); color: var(--cream); border-color: var(--terracotta);
+  }
+  .progress-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .progress-step.active .progress-label { color: var(--forest); }
+
+  /* ---------- main layout ---------- */
+  .booking-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+    display: grid;
+    grid-template-columns: 1.4fr 0.9fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .step { display: none; animation: fadeIn 0.5s ease; }
+  .step.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-header { margin-bottom: 2rem; }
+  .step-header h1 {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    color: var(--forest);
+    line-height: 1.05;
+    margin: 0.6rem 0 0.7rem;
+  }
+  .step-header h1 em { color: var(--terracotta); }
+  .step-header p {
+    color: var(--ink-soft);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  /* ---------- treatments grid ---------- */
+  .treatments-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+  }
+  .treatment {
+    background: var(--pearl);
+    border: 1.5px solid rgba(45, 58, 42, 0.1);
+    padding: 1.4rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .treatment:hover { border-color: var(--sage); transform: translateY(-2px); }
+  .treatment.selected {
+    border-color: var(--forest);
+    background: var(--forest);
+    color: var(--cream);
+  }
+  .treatment.selected .t-name, .treatment.selected .t-price { color: var(--cream); }
+  .treatment.selected .t-meta { color: rgba(244, 237, 225, 0.7); }
+  .treatment.selected .t-tag { color: var(--terracotta-soft); }
+  .treatment.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 0.9rem; right: 0.9rem;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--terracotta); color: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 600;
+  }
+  .t-tag {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--terracotta);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    min-height: 0.85rem;
+  }
+  .t-name {
+    font-family: var(--display);
+    font-size: 1.18rem;
+    color: var(--forest);
+    margin-bottom: 0.3rem;
+    line-height: 1.2;
+  }
+  .t-meta {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 0.7rem;
+  }
+  .t-price {
+    font-family: var(--display);
+    font-size: 1.35rem;
+    color: var(--forest);
+    line-height: 1;
+  }
+
+  /* ---------- calendar ---------- */
+  .cal-wrap {
+    background: var(--pearl);
+    border-radius: 12px;
+    padding: 1.6rem;
+    border: 1px solid rgba(45, 58, 42, 0.08);
+  }
+  .cal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  .cal-month {
+    font-family: var(--display);
+    font-size: 1.3rem;
+    color: var(--forest);
+  }
+  .cal-month em { color: var(--terracotta); }
+  .cal-nav { display: flex; gap: 0.4rem; }
+  .cal-nav button {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(45, 58, 42, 0.15);
+    background: var(--cream);
+    cursor: pointer;
+    color: var(--forest);
+    transition: all 0.3s ease;
+  }
+  .cal-nav button:hover { background: var(--forest); color: var(--cream); border-color: var(--forest); }
+  .cal-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .cal-dow {
+    text-align: center;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    padding: 0.5rem 0;
+    font-weight: 500;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .cal-day.empty { cursor: default; }
+  .cal-day.disabled {
+    color: rgba(45, 58, 42, 0.25);
+    cursor: not-allowed;
+  }
+  .cal-day.available:hover { background: var(--cream-deep); }
+  .cal-day.available::after {
+    content: '';
+    position: absolute;
+    bottom: 5px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--sage);
+  }
+  .cal-day.today { font-weight: 600; color: var(--terracotta); }
+  .cal-day.selected {
+    background: var(--forest);
+    color: var(--cream);
+    font-weight: 500;
+  }
+  .cal-day.selected::after { background: var(--terracotta-soft); }
+
+  .cal-legend {
+    display: flex; gap: 1.4rem;
+    margin-top: 1.4rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(45, 58, 42, 0.08);
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+  }
+  .cal-legend-item { display: flex; align-items: center; gap: 0.45rem; }
+  .legend-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .legend-dot.green { background: var(--sage); }
+  .legend-dot.gray { background: rgba(45, 58, 42, 0.2); }
+
+  /* ---------- time slots ---------- */
+  .timeslots {
+    margin-top: 1.8rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid rgba(45, 58, 42, 0.08);
+  }
+  .timeslots h3 {
+    font-family: var(--display);
+    font-size: 1.05rem;
+    color: var(--forest);
+    margin-bottom: 0.9rem;
+  }
+  .timeslots h3 em { color: var(--terracotta); }
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.55rem;
+  }
+  .slot {
+    padding: 0.8rem;
+    background: var(--cream);
+    border: 1px solid rgba(45, 58, 42, 0.12);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--forest);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+  }
+  .slot:hover { border-color: var(--sage-deep); }
+  .slot.selected {
+    background: var(--forest); color: var(--cream);
+    border-color: var(--forest);
+  }
+  .slot.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+  .timeslots-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    font-family: var(--display);
+    font-size: 1.05rem;
+  }
+
+  /* ---------- form ---------- */
+  .form-card {
+    background: var(--pearl);
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid rgba(45, 58, 42, 0.08);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label {
+    display: block;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--sage-deep);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.85rem 0.95rem;
+    background: var(--cream);
+    border: 1px solid rgba(45, 58, 42, 0.15);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    color: var(--ink);
+    transition: border-color 0.3s ease;
+    border-radius: 6px;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--forest);
+  }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+
+  .area-warning {
+    margin-top: 0.7rem;
+    padding: 0.85rem 1rem;
+    background: rgba(196, 126, 58, 0.1);
+    border-left: 3px solid var(--warning);
+    border-radius: 4px;
+    font-size: 0.84rem;
+    color: var(--ink);
+    display: none;
+    line-height: 1.5;
+  }
+  .area-warning.show { display: block; animation: fadeIn 0.3s ease; }
+  .area-warning strong { color: var(--warning); }
+
+  .area-confirmed {
+    margin-top: 0.7rem;
+    padding: 0.6rem 1rem;
+    background: rgba(138, 154, 123, 0.15);
+    border-left: 3px solid var(--sage);
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--sage-deep);
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .area-confirmed.show { display: flex; animation: fadeIn 0.3s ease; }
+
+  /* ---------- summary panel ---------- */
+  .summary {
+    position: sticky;
+    top: 100px;
+    background: var(--pearl);
+    border-radius: 12px;
+    padding: 1.8rem;
+    border: 1px solid rgba(45, 58, 42, 0.08);
+  }
+  .summary-title {
+    font-family: var(--display);
+    font-size: 1.2rem;
+    color: var(--forest);
+    margin-bottom: 1.3rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid rgba(45, 58, 42, 0.1);
+  }
+  .summary-title em { color: var(--terracotta); }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+  }
+  .summary-row .lbl {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.66rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .summary-row .val {
+    font-family: var(--display);
+    color: var(--forest);
+    text-align: right;
+    line-height: 1.3;
+    max-width: 60%;
+    font-size: 0.95rem;
+  }
+  .summary-row .val em { color: var(--terracotta); }
+  .summary-row.empty .val {
+    color: rgba(45, 58, 42, 0.3);
+    font-style: italic;
+  }
+  .summary-totals {
+    margin-top: 1.4rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(45, 58, 42, 0.1);
+  }
+  .summary-line {
+    display: flex; justify-content: space-between;
+    margin-bottom: 0.55rem;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .summary-line.total {
+    font-family: var(--display);
+    font-size: 1.3rem;
+    color: var(--forest);
+    margin-top: 0.6rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(45, 58, 42, 0.1);
+  }
+  .summary-due {
+    margin-top: 1.3rem;
+    padding: 0.95rem 1.1rem;
+    background: var(--forest);
+    color: var(--cream);
+    border-radius: 8px;
+    border-left: 3px solid var(--terracotta);
+  }
+  .summary-due .lbl {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(244, 237, 225, 0.7);
+    margin-bottom: 0.3rem;
+  }
+  .summary-due .amt {
+    font-family: var(--display);
+    font-size: 1.7rem;
+    color: var(--terracotta-soft);
+    line-height: 1;
+  }
+  .summary-due small {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    color: rgba(244, 237, 225, 0.6);
+    line-height: 1.4;
+  }
+
+  /* ---------- step actions ---------- */
+  .step-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2.2rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(45, 58, 42, 0.08);
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.7rem;
+    padding: 0.9rem 1.7rem;
+    background: var(--forest);
+    color: var(--cream);
+    text-decoration: none;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 999px;
+  }
+  .btn:hover { background: var(--terracotta); transform: translateY(-1px); }
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: var(--ink-soft);
+    transform: none;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    padding: 0.9rem 1.4rem;
+  }
+  .btn-ghost:hover { color: var(--forest); background: transparent; transform: none; }
+
+  /* ---------- confirmation step ---------- */
+  .confirmation {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    grid-column: 1 / -1;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .conf-icon {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    background: var(--sage);
+    color: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem;
+    margin: 0 auto 1.8rem;
+    animation: pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+  .confirmation h1 {
+    font-size: 2.4rem;
+    color: var(--forest);
+    margin-bottom: 0.8rem;
+    line-height: 1.05;
+  }
+  .confirmation h1 em { color: var(--terracotta); }
+  .confirmation > p.lede {
+    color: var(--ink-soft);
+    max-width: 480px;
+    margin: 0 auto 2.2rem;
+    line-height: 1.7;
+  }
+  .conf-receipt {
+    background: var(--pearl);
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid rgba(45, 58, 42, 0.08);
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+  .conf-receipt h3 {
+    font-family: var(--display);
+    font-size: 1.1rem;
+    color: var(--forest);
+    margin-bottom: 1rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgba(45, 58, 42, 0.1);
+  }
+  .conf-receipt h3 em { color: var(--terracotta); }
+  .conf-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 0.7rem;
+    font-size: 0.88rem;
+  }
+  .conf-row .lbl {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.66rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .conf-row .val {
+    font-family: var(--display);
+    color: var(--forest);
+    text-align: right;
+    max-width: 60%;
+  }
+  .conf-email-note {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(138, 154, 123, 0.1);
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  .conf-email-note strong { color: var(--forest); }
+
+  /* ---------- mobile ---------- */
+  @media (max-width: 1024px) {
+    nav, .progress { padding: 1.2rem 1.5rem; }
+    .booking-shell {
+      grid-template-columns: 1fr;
+      padding: 2rem 1.5rem 4rem;
+      gap: 2rem;
+    }
+    .summary { position: static; order: -1; }
+    .treatments-grid { grid-template-columns: 1fr; }
+    .slot-grid { grid-template-columns: repeat(3, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+    .progress-label { display: none; }
+    .step-header h1 { font-size: 1.8rem; }
+  }
+  @media (max-width: 480px) {
+    .slot-grid { grid-template-columns: repeat(2, 1fr); }
+    .step-actions { flex-direction: column-reverse; gap: 0.8rem; align-items: stretch; }
+    .step-actions .btn { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <img src="logo.png" alt="Ruta Naturals" style="height: 48px; width: auto; object-fit: contain;">
+  </a>
+  <a href="index.html" class="back-link">← Back to Site</a>
+</nav>
+
+<div class="progress">
+  <div class="progress-inner">
+    <div class="progress-step active" data-step="1">
+      <div class="progress-dot">1</div>
+      <div class="progress-label">Treatment</div>
+    </div>
+    <div class="progress-step" data-step="2">
+      <div class="progress-dot">2</div>
+      <div class="progress-label">Date & Time</div>
+    </div>
+    <div class="progress-step" data-step="3">
+      <div class="progress-dot">3</div>
+      <div class="progress-label">Your Details</div>
+    </div>
+    <div class="progress-step" data-step="4">
+      <div class="progress-dot">4</div>
+      <div class="progress-label">Confirm & Pay</div>
+    </div>
+  </div>
+</div>
+
+<div class="booking-shell" id="shell">
+
+  <!-- ============ MAIN COLUMN ============ -->
+  <div class="step-column">
+
+    <!-- STEP 1: TREATMENT -->
+    <div class="step active" data-step="1">
+      <div class="step-header">
+        <div class="eyebrow">Step One</div>
+        <h1>Choose your <em>treatment.</em></h1>
+        <p>All treatments include a complimentary lymphatic massage.</p>
+      </div>
+      <div class="treatments-grid">
+        <div class="treatment" data-name="HIFU Facial Lifting" data-price="320" data-duration="90">
+          <span class="t-tag">Most Popular</span>
+          <div class="t-name">HIFU Facial Lifting</div>
+          <div class="t-meta">90 min · zero downtime</div>
+          <div class="t-price">$320</div>
+        </div>
+        <div class="treatment" data-name="Signature Facial" data-price="180" data-duration="75">
+          <span class="t-tag">Best Value</span>
+          <div class="t-name">Signature Facial</div>
+          <div class="t-meta">75 min · hand-formulated products</div>
+          <div class="t-price">$180</div>
+        </div>
+        <div class="treatment" data-name="IPL Photo Facial" data-price="240" data-duration="60">
+          <span class="t-tag">Skin Renewal</span>
+          <div class="t-name">IPL Photo Facial</div>
+          <div class="t-meta">60 min · sun damage targeted</div>
+          <div class="t-price">$240</div>
+        </div>
+        <div class="treatment" data-name="Radio Frequency Facial" data-price="200" data-duration="60">
+          <span class="t-tag">Anti-Aging</span>
+          <div class="t-name">Radio Frequency Facial</div>
+          <div class="t-meta">60 min · collagen remodeling</div>
+          <div class="t-price">$200</div>
+        </div>
+        <div class="treatment" data-name="Body Contouring & Sculpting" data-price="280" data-duration="90">
+          <span class="t-tag">Body</span>
+          <div class="t-name">Body Contouring</div>
+          <div class="t-meta">90 min · cavitation + RF + lymph</div>
+          <div class="t-price">$280</div>
+        </div>
+        <div class="treatment" data-name="Lymphatic Pressotherapy" data-price="140" data-duration="45">
+          <span class="t-tag">Wellness</span>
+          <div class="t-name">Lymphatic Pressotherapy</div>
+          <div class="t-meta">45 min · circulation + detox</div>
+          <div class="t-price">$140</div>
+        </div>
+        <div class="treatment" data-name="Back Facial" data-price="160" data-duration="60">
+          <span class="t-tag">Body</span>
+          <div class="t-name">Back Facial</div>
+          <div class="t-meta">60 min · deep cleanse + extract</div>
+          <div class="t-price">$160</div>
+        </div>
+        <div class="treatment" data-name="Express Facial" data-price="110" data-duration="45">
+          <span class="t-tag">Quick Glow</span>
+          <div class="t-name">Express Facial</div>
+          <div class="t-meta">45 min · glow refresh</div>
+          <div class="t-price">$110</div>
+        </div>
+      </div>
+      <div class="step-actions">
+        <span></span>
+        <button class="btn" id="next-1" disabled>Next: Date & Time →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: DATE & TIME -->
+    <div class="step" data-step="2">
+      <div class="step-header">
+        <div class="eyebrow">Step Two</div>
+        <h1>Pick a date & <em>time.</em></h1>
+        <p>Available slots show in green. Ruta works Monday through Saturday, 9am to 7pm.</p>
+      </div>
+      <div class="cal-wrap">
+        <div class="cal-head">
+          <div class="cal-month" id="cal-month">May <em>2026</em></div>
+          <div class="cal-nav">
+            <button id="cal-prev">←</button>
+            <button id="cal-next">→</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-legend">
+          <div class="cal-legend-item"><span class="legend-dot green"></span> Available</div>
+          <div class="cal-legend-item"><span class="legend-dot gray"></span> Unavailable</div>
+        </div>
+        <div class="timeslots" id="timeslots" style="display:none;">
+          <h3 id="ts-heading">Available times for <em>—</em></h3>
+          <div class="slot-grid" id="slot-grid"></div>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-ghost" data-back="1">← Back</button>
+        <button class="btn" id="next-2" disabled>Next: Your Details →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: DETAILS -->
+    <div class="step" data-step="3">
+      <div class="step-header">
+        <div class="eyebrow">Step Three</div>
+        <h1>Your <em>details.</em></h1>
+        <p>Where Ruta should arrive and how to reach you. Used only for your booking.</p>
+      </div>
+      <div class="form-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="f-first" placeholder="Your first name" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="f-last" placeholder="Your last name" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="f-email" placeholder="you@email.com" required />
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="f-phone" placeholder="(941) 555-0100" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Service Address</label>
+          <input type="text" id="f-address" placeholder="Street address" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="f-city" placeholder="e.g. North Port" required />
+          </div>
+          <div class="form-group">
+            <label>ZIP Code</label>
+            <input type="text" id="f-zip" placeholder="e.g. 34286" maxlength="5" required />
+          </div>
+        </div>
+        <div class="area-confirmed" id="area-ok">
+          <span>✓</span> <span id="area-ok-text">Great — you're inside Ruta's no-fee service area.</span>
+        </div>
+        <div class="area-warning" id="area-warn">
+          <strong>Heads up</strong> — that ZIP looks outside Ruta's primary area (North Port, Port Charlotte, Venice, Englewood). She may still be able to come, but a small travel fee may apply. She'll confirm by email before charging anything beyond the deposit.
+        </div>
+        <div class="form-group" style="margin-top: 1.2rem;">
+          <label>Notes for Ruta (optional)</label>
+          <textarea id="f-notes" placeholder="Any allergies, skin concerns, parking notes, etc."></textarea>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-ghost" data-back="2">← Back</button>
+        <button class="btn" id="next-3" disabled>Review & Pay →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: CONFIRM & PAY -->
+    <div class="step" data-step="4">
+      <div class="step-header">
+        <div class="eyebrow">Final Step</div>
+        <h1>Review & <em>reserve.</em></h1>
+        <p>A $25 deposit secures your appointment. It's applied directly toward your treatment total — the rest is paid in person.</p>
+      </div>
+      <div class="form-card">
+        <h3 style="font-family: var(--display); color: var(--forest); margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid rgba(45,58,42,0.1); font-size: 1.1rem;">Booking summary</h3>
+        <div id="confirm-details"></div>
+        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(184, 103, 74, 0.08); border-left: 3px solid var(--terracotta); border-radius: 4px; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.6;">
+          <strong style="color: var(--forest);">Cancellation policy.</strong> Cancellations more than 48 hours before your appointment are fully refunded. Same-day cancellations forfeit the $25 deposit.
+        </div>
+        <div style="margin-top: 1.2rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--ink-soft);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--sage-deep)"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg>
+          Payment secured by Stripe · 256-bit encryption
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-ghost" data-back="3">← Back</button>
+        <button class="btn" id="pay-btn">Pay $25 & Reserve →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: CONFIRMATION (post-payment) -->
+    <div class="step" data-step="5">
+      <div class="confirmation">
+        <div class="conf-icon">✓</div>
+        <h1>Your visit is <em>booked.</em></h1>
+        <p class="lede">Thank you. Ruta has been notified and will send a personal confirmation text within a few hours.</p>
+        <div class="conf-receipt">
+          <h3>Booking <em>#<span id="conf-id">RN-0421</span></em></h3>
+          <div id="conf-rows"></div>
+        </div>
+        <div class="conf-email-note">
+          A confirmation email is on its way to <strong id="conf-email">your email</strong>. <br/>
+          Add a note to your calendar — see you soon.
+        </div>
+        <button class="btn" style="margin-top: 1.8rem;" onclick="window.location.href='index.html'">Return to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SUMMARY (right rail) ============ -->
+  <aside class="summary" id="summary">
+    <div class="summary-title">Your <em>booking</em></div>
+
+    <div class="summary-row" id="sum-treatment">
+      <div class="lbl">Treatment</div>
+      <div class="val">—</div>
+    </div>
+    <div class="summary-row" id="sum-duration">
+      <div class="lbl">Duration</div>
+      <div class="val">—</div>
+    </div>
+    <div class="summary-row" id="sum-date">
+      <div class="lbl">Date</div>
+      <div class="val">—</div>
+    </div>
+    <div class="summary-row" id="sum-time">
+      <div class="lbl">Time</div>
+      <div class="val">—</div>
+    </div>
+    <div class="summary-row" id="sum-address" style="display:none;">
+      <div class="lbl">Address</div>
+      <div class="val">—</div>
+    </div>
+
+    <div class="summary-totals">
+      <div class="summary-line">
+        <span>Treatment</span>
+        <span id="line-treatment">—</span>
+      </div>
+      <div class="summary-line">
+        <span>Lymphatic massage</span>
+        <span style="color: var(--sage-deep); font-style: italic;">complimentary</span>
+      </div>
+      <div class="summary-line total">
+        <span>Total</span>
+        <span id="line-total">—</span>
+      </div>
+    </div>
+
+    <div class="summary-due">
+      <div class="lbl">Due now (deposit)</div>
+      <div class="amt">$25.00</div>
+      <small>Applied to your total. Remaining balance paid in person at your visit.</small>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  // ============ STATE ============
+  const state = {
+    step: 1,
+    treatment: null,    // {name, price, duration}
+    date: null,         // Date object
+    time: null,         // string like "10:00 AM"
+    details: {}
+  };
+
+  // ============ STEP NAVIGATION ============
+  function goToStep(n) {
+    state.step = n;
+    document.querySelectorAll('.step').forEach(s => {
+      s.classList.toggle('active', +s.dataset.step === n);
+    });
+    document.querySelectorAll('.progress-step').forEach(s => {
+      const stepNum = +s.dataset.step;
+      s.classList.remove('active', 'done');
+      if (stepNum < n) s.classList.add('done');
+      if (stepNum === n) s.classList.add('active');
+    });
+    // Hide sidebar on confirmation step
+    document.getElementById('summary').style.display = (n === 5) ? 'none' : 'block';
+    if (n === 5) {
+      document.getElementById('shell').style.gridTemplateColumns = '1fr';
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => goToStep(+btn.dataset.back));
+  });
+
+  // ============ STEP 1: TREATMENTS ============
+  document.querySelectorAll('.treatment').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.treatment').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.treatment = {
+        name: card.dataset.name,
+        price: +card.dataset.price,
+        duration: +card.dataset.duration
+      };
+      updateSummary();
+      document.getElementById('next-1').disabled = false;
+    });
+  });
+  document.getElementById('next-1').addEventListener('click', () => {
+    renderCalendar();
+    goToStep(2);
+  });
+
+  // ============ STEP 2: CALENDAR ============
+  let viewMonth = new Date();
+  viewMonth.setDate(1);
+
+  // Mocked unavailable dates: random "fully booked" days
+  // In real app, these come from Cal.com / Google Calendar API
+  const todayStr = new Date().toDateString();
+  function isFullyBooked(d) {
+    // mock: every 5th day fully booked, plus all Sundays
+    if (d.getDay() === 0) return true;
+    if (d.getDate() % 7 === 3) return true;
+    return false;
+  }
+  function isPast(d) {
+    const t = new Date(); t.setHours(0,0,0,0);
+    return d < t;
+  }
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dowNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  function renderCalendar() {
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    // day-of-week header
+    dowNames.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    document.getElementById('cal-month').innerHTML = `${monthNames[viewMonth.getMonth()]} <em>${viewMonth.getFullYear()}</em>`;
+
+    const firstDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1).getDay();
+    const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth()+1, 0).getDate();
+
+    // empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+      const el = document.createElement('button');
+      el.className = 'cal-day empty';
+      el.disabled = true;
+      grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), d);
+      const el = document.createElement('button');
+      el.className = 'cal-day';
+      el.textContent = d;
+
+      if (isPast(date)) {
+        el.classList.add('disabled');
+        el.disabled = true;
+      } else if (isFullyBooked(date)) {
+        el.classList.add('disabled');
+        el.disabled = true;
+      } else {
+        el.classList.add('available');
+        el.addEventListener('click', () => selectDate(date, el));
+      }
+
+      if (date.toDateString() === todayStr) el.classList.add('today');
+      if (state.date && state.date.toDateString() === date.toDateString()) {
+        el.classList.add('selected');
+      }
+      grid.appendChild(el);
+    }
+
+    // disable prev button if we're at current month
+    const now = new Date();
+    document.getElementById('cal-prev').disabled = (
+      viewMonth.getMonth() === now.getMonth() &&
+      viewMonth.getFullYear() === now.getFullYear()
+    );
+  }
+
+  document.getElementById('cal-prev').addEventListener('click', () => {
+    viewMonth.setMonth(viewMonth.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById('cal-next').addEventListener('click', () => {
+    viewMonth.setMonth(viewMonth.getMonth() + 1);
+    renderCalendar();
+  });
+
+  function selectDate(date, el) {
+    state.date = date;
+    state.time = null;
+    document.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    renderTimeSlots(date);
+    updateSummary();
+    document.getElementById('next-2').disabled = true;
+  }
+
+  // mocked time slots — in production these come from Cal.com availability
+  const allSlots = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM'];
+  function renderTimeSlots(date) {
+    const wrap = document.getElementById('timeslots');
+    const grid = document.getElementById('slot-grid');
+    wrap.style.display = 'block';
+    document.getElementById('ts-heading').innerHTML =
+      `Available times for <em>${monthNames[date.getMonth()]} ${date.getDate()}</em>`;
+    grid.innerHTML = '';
+
+    // mock: random 3-4 slots booked per day
+    const seed = date.getDate();
+    const bookedIdx = [(seed*3)%10, (seed*5+1)%10, (seed*7+2)%10];
+
+    allSlots.forEach((time, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'slot';
+      btn.textContent = time;
+      if (bookedIdx.includes(i)) {
+        btn.classList.add('disabled');
+        btn.disabled = true;
+      } else {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot.selected').forEach(s => s.classList.remove('selected'));
+          btn.classList.add('selected');
+          state.time = time;
+          updateSummary();
+          document.getElementById('next-2').disabled = false;
+        });
+      }
+      grid.appendChild(btn);
+    });
+  }
+
+  document.getElementById('next-2').addEventListener('click', () => goToStep(3));
+
+  // ============ STEP 3: DETAILS / ADDRESS CHECK ============
+  // In-area ZIPs (North Port, Port Charlotte, Venice, Englewood)
+  const inAreaZips = new Set([
+    // North Port
+    '34286','34287','34288','34289','34291','34290',
+    // Port Charlotte
+    '33948','33952','33953','33954','33980','33981','33983',
+    // Venice
+    '34285','34292','34293','34275',
+    // Englewood
+    '34223','34224'
+  ]);
+
+  function checkArea() {
+    const zip = document.getElementById('f-zip').value.trim();
+    const ok = document.getElementById('area-ok');
+    const warn = document.getElementById('area-warn');
+    if (zip.length === 5 && /^\d{5}$/.test(zip)) {
+      if (inAreaZips.has(zip)) {
+        ok.classList.add('show');
+        warn.classList.remove('show');
+        const cityMap = {
+          '34286':'North Port','34287':'North Port','34288':'North Port','34289':'North Port','34291':'North Port','34290':'North Port',
+          '33948':'Port Charlotte','33952':'Port Charlotte','33953':'Port Charlotte','33954':'Port Charlotte','33980':'Port Charlotte','33981':'Port Charlotte','33983':'Port Charlotte',
+          '34285':'Venice','34292':'Venice','34293':'Venice','34275':'Venice',
+          '34223':'Englewood','34224':'Englewood'
+        };
+        document.getElementById('area-ok-text').textContent =
+          `Great — you're in ${cityMap[zip]}, inside Ruta's no-fee service area.`;
+      } else {
+        warn.classList.add('show');
+        ok.classList.remove('show');
+      }
+    } else {
+      ok.classList.remove('show');
+      warn.classList.remove('show');
+    }
+    validateDetails();
+  }
+
+  function validateDetails() {
+    const fields = ['f-first','f-last','f-email','f-phone','f-address','f-city','f-zip'];
+    const allFilled = fields.every(id => document.getElementById(id).value.trim().length > 0);
+    const emailOk = /^\S+@\S+\.\S+$/.test(document.getElementById('f-email').value);
+    const zipOk = /^\d{5}$/.test(document.getElementById('f-zip').value);
+    document.getElementById('next-3').disabled = !(allFilled && emailOk && zipOk);
+  }
+
+  ['f-first','f-last','f-email','f-phone','f-address','f-city','f-zip','f-notes'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      if (id === 'f-zip') checkArea();
+      else validateDetails();
+    });
+  });
+
+  document.getElementById('next-3').addEventListener('click', () => {
+    state.details = {
+      first: document.getElementById('f-first').value,
+      last: document.getElementById('f-last').value,
+      email: document.getElementById('f-email').value,
+      phone: document.getElementById('f-phone').value,
+      address: document.getElementById('f-address').value,
+      city: document.getElementById('f-city').value,
+      zip: document.getElementById('f-zip').value,
+      notes: document.getElementById('f-notes').value
+    };
+    renderConfirmDetails();
+    updateSummary();
+    goToStep(4);
+  });
+
+  // ============ STEP 4: CONFIRM ============
+  function renderConfirmDetails() {
+    const d = state.details;
+    const dateStr = state.date ? `${monthNames[state.date.getMonth()]} ${state.date.getDate()}, ${state.date.getFullYear()}` : '';
+    document.getElementById('confirm-details').innerHTML = `
+      <div class="conf-row"><div class="lbl">Treatment</div><div class="val">${state.treatment.name}</div></div>
+      <div class="conf-row"><div class="lbl">Duration</div><div class="val">${state.treatment.duration} min</div></div>
+      <div class="conf-row"><div class="lbl">Date</div><div class="val">${dateStr}</div></div>
+      <div class="conf-row"><div class="lbl">Time</div><div class="val">${state.time}</div></div>
+      <div class="conf-row"><div class="lbl">Client</div><div class="val">${d.first} ${d.last}</div></div>
+      <div class="conf-row"><div class="lbl">Email</div><div class="val">${d.email}</div></div>
+      <div class="conf-row"><div class="lbl">Phone</div><div class="val">${d.phone}</div></div>
+      <div class="conf-row"><div class="lbl">Address</div><div class="val">${d.address}<br/>${d.city}, FL ${d.zip}</div></div>
+      ${d.notes ? `<div class="conf-row"><div class="lbl">Notes</div><div class="val" style="font-style: italic;">${d.notes}</div></div>` : ''}
+      <div style="height: 1px; background: rgba(45,58,42,0.1); margin: 1rem 0;"></div>
+      <div class="conf-row"><div class="lbl">Treatment total</div><div class="val">$${state.treatment.price.toFixed(2)}</div></div>
+      <div class="conf-row"><div class="lbl">Deposit (now)</div><div class="val" style="color: var(--terracotta);">$25.00</div></div>
+      <div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$${(state.treatment.price - 25).toFixed(2)}</div></div>
+    `;
+  }
+
+  // ============ PAY (REAL Stripe integration) ============
+  document.getElementById('pay-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('pay-btn');
+    btn.disabled = true;
+    btn.innerHTML = 'Redirecting to secure payment...';
+    
+    const d = state.details;
+    const data = {
+      firstName: d.first,
+      lastName:  d.last,
+      email:     d.email,
+      phone:     d.phone,
+      address:   `${d.address}, ${d.city}, FL ${d.zip}`,
+      treatment: `${state.treatment.name} — $${state.treatment.price}`,
+      date:      `${state.date.toDateString()} at ${state.time}`,
+      notes:     d.notes
+    };
+
+    try {
+      const res  = await fetch('/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Something went wrong.');
+      window.location.href = json.url;   // → Stripe hosted checkout
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerHTML = 'Pay $25 & Reserve →';
+      alert(err.message);
+    }
+  });
+
+  // ============ SUMMARY UPDATER ============
+  function updateSummary() {
+    if (state.treatment) {
+      document.querySelector('#sum-treatment .val').textContent = state.treatment.name;
+      document.querySelector('#sum-duration .val').textContent = state.treatment.duration + ' min';
+      document.getElementById('line-treatment').textContent = '$' + state.treatment.price.toFixed(2);
+      document.getElementById('line-total').textContent = '$' + state.treatment.price.toFixed(2);
+    }
+    if (state.date) {
+      document.querySelector('#sum-date .val').innerHTML =
+        `${monthNames[state.date.getMonth()]} <em>${state.date.getDate()}</em>`;
+    }
+    if (state.time) {
+      document.querySelector('#sum-time .val').textContent = state.time;
+    }
+    if (state.details.address) {
+      document.getElementById('sum-address').style.display = 'flex';
+      document.querySelector('#sum-address .val').innerHTML =
+        `${state.details.city}, ${state.details.zip}`;
+    }
+  }
+</script>
+
+</body>
+</html>

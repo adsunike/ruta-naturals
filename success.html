@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking Confirmed — Ruta Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #f4ede1; --forest: #2d3a2a; --terracotta: #b8674a;
+      --terracotta-soft: #d49278; --sage: #8a9a7b; --sage-deep: #5b6e52;
+      --ink-soft: #4a463d; --pearl: #fbf7ee;
+      --display: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--sans); background: var(--cream);
+      color: var(--forest); min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem; font-weight: 300;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 999;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .card {
+      max-width: 560px; width: 100%;
+      background: var(--pearl); border-radius: 12px;
+      padding: 4rem 3.5rem; text-align: center;
+      box-shadow: 0 40px 100px rgba(45,58,42,0.1);
+      border: 1px solid rgba(45,58,42,0.06);
+      animation: rise 0.9s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    @keyframes rise {
+      from { opacity:0; transform:translateY(40px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .check-circle {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--sage); margin: 0 auto 2rem;
+      display: flex; align-items: center; justify-content: center;
+      animation: pop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.4s both;
+    }
+    @keyframes pop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .check-circle svg { width: 36px; height: 36px; stroke: var(--cream); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .eyebrow {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3em;
+      color: var(--terracotta); font-weight: 500; margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--display); font-weight: 300; font-size: 2.6rem;
+      line-height: 1.05; margin-bottom: 1.2rem;
+    }
+    h1 em { font-style: italic; color: var(--terracotta); }
+    p {
+      color: var(--ink-soft); font-size: 1rem; line-height: 1.7; margin-bottom: 1rem;
+    }
+    .details-box {
+      margin: 2rem 0; padding: 1.4rem 1.8rem;
+      background: var(--cream); border-radius: 8px;
+      border-left: 3px solid var(--terracotta);
+      text-align: left;
+    }
+    .details-box p { margin: 0; font-size: 0.9rem; }
+    .details-box strong { color: var(--forest); font-weight: 500; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.95rem 2rem; background: var(--forest); color: var(--cream);
+      text-decoration: none; font-family: var(--sans); font-size: 0.8rem;
+      font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+      border-radius: 999px; transition: all 0.3s ease; margin-top: 0.5rem;
+    }
+    .btn:hover { background: var(--terracotta); transform: translateY(-2px); }
+    .divider {
+      margin: 2rem auto; width: 40px; height: 1px; background: rgba(45,58,42,0.2);
+    }
+    .contact {
+      font-size: 0.85rem; color: var(--ink-soft);
+    }
+    .contact a { color: var(--terracotta); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="check-circle">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="eyebrow">Deposit Received</div>
+    <h1>You're all <em>set.</em></h1>
+    <p>Your $25 deposit was processed successfully. Ruta will review your request and confirm your appointment by text within a few hours.</p>
+
+    <div class="details-box" id="details">
+      <p><strong>What's next:</strong> Watch for a text or email from Ruta with your confirmed time. She'll arrive with everything — you just need to be home.</p>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--sage-deep);">A receipt has been sent to your email by Stripe.</p>
+
+    <div class="divider"></div>
+
+    <a href="/" class="btn">Back to Ruta Naturals →</a>
+
+    <div class="divider"></div>
+    <div class="contact">
+      Questions? Call or text <a href="tel:8885525752">(888) 552-5752</a><br/>
+      or email <a href="mailto:rutanaturalle@gmail.com">rutanaturalle@gmail.com</a>
+    </div>
+  </div>
+
+  <script>
+    // Optionally fetch session details from Stripe to personalise the message
+    const params = new URLSearchParams(location.search);
+    const sessionId = params.get('session_id');
+    // You could hit /session-details?id=sessionId on your server here
+    // For now we just show a clean confirmation.
+  </script>
+</body>
+</html>

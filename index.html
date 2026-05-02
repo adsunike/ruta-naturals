@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ruta Naturals — Concierge Facial Spa | North Port, Florida</title>
+    <meta name="description"
+        content="28+ years of expertise, now in the comfort of your home. Concierge natural facial & body treatments serving North Port, Port Charlotte, Venice & Englewood, Florida." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Inter:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --cream: #f4ede1;
+            --cream-deep: #ebe1cf;
+            --sand: #d8c8ad;
+            --sage: #8a9a7b;
+            --sage-deep: #5b6e52;
+            --forest: #2d3a2a;
+            --terracotta: #b8674a;
+            --terracotta-soft: #d49278;
+            --ink: #1f1d18;
+            --ink-soft: #4a463d;
+            --gold: #a88a4a;
+            --pearl: #fbf7ee;
+
+            --serif: 'Cormorant Garamond', 'Fraunces', Georgia, serif;
+            --display: 'Fraunces', Georgia, serif;
+            --sans: 'Inter', -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--cream);
+            color: var(--ink);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-weight: 300;
+        }
+
+        /* ---------- grain overlay ---------- */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ---------- typography ---------- */
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: var(--display);
+            font-weight: 300;
+            letter-spacing: -0.01em;
+        }
+
+        .eyebrow {
+            font-family: var(--sans);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.32em;
+            color: var(--sage-deep);
+            font-weight: 500;
+        }
+
+        em {
+            font-family: var(--serif);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        /* ---------- nav ---------- */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s ease;
+            background: transparent;
+        }
+
+        nav.scrolled {
+            background: rgba(244, 237, 225, 0.92);
+            backdrop-filter: blur(20px);
+            padding: 1rem 3rem;
+            border-bottom: 1px solid rgba(45, 58, 42, 0.08);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: var(--ink);
+        }
+
+        .logo-img {
+            height: 75px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-img-footer {
+            height: 100px;
+            width: auto;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--ink);
+            font-size: 0.82rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            position: relative;
+            padding: 0.3rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--forest);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.95rem 1.8rem;
+            background: var(--forest);
+            color: var(--cream);
+            text-decoration: none;
+            font-family: var(--sans);
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border-radius: 999px;
+        }
+
+        .nav-links a.btn {
+            color: var(--cream);
+        }
+        
+        .nav-links a.btn::after {
+            display: none;
+        }
+
+        .btn:hover, .nav-links a.btn:hover {
+            background: var(--terracotta);
+            transform: translateY(-2px);
+            color: var(--cream);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--forest);
+            border: 1px solid var(--forest);
+        }
+
+        .btn-outline:hover {
+            background: var(--forest);
+            color: var(--cream);
+        }
+
+        .btn-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover .btn-arrow {
+            transform: translateX(4px);
+        }
+
+        /* ---------- HERO ---------- */
+        .hero {
+            min-height: 100vh;
+            padding: 9rem 3rem 4rem;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            right: -15%;
+            width: 60%;
+            height: 80%;
+            background: radial-gradient(ellipse, rgba(138, 154, 123, 0.18), transparent 60%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            animation: fadeUp 1s ease 0.2s both;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            width: 30px;
+            height: 1px;
+            background: var(--sage-deep);
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 7vw, 6rem);
+            line-height: 0.98;
+            margin-bottom: 1.8rem;
+            color: var(--forest);
+            letter-spacing: -0.02em;
+            animation: fadeUp 1s ease 0.4s both;
+        }
+
+        .hero h1 em {
+            color: var(--terracotta);
+            font-weight: 300;
+        }
+
+        .hero h1 .underline {
+            display: inline-block;
+            position: relative;
+        }
+
+        .hero h1 .underline::after {
+            content: '';
+            position: absolute;
+            bottom: 0.1em;
+            left: 0;
+            right: 0;
+            height: 0.18em;
+            background: rgba(184, 103, 74, 0.25);
+            z-index: -1;
+        }
+
+        .hero-lede {
+            font-size: 1.15rem;
+            color: var(--ink-soft);
+            margin-bottom: 2.5rem;
+            max-width: 480px;
+            line-height: 1.7;
+            animation: fadeUp 1s ease 0.6s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            animation: fadeUp 1s ease 0.8s both;
+        }
+
+        .hero-meta {
+            margin-top: 3.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(45, 58, 42, 0.15);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            animation: fadeUp 1s ease 1s both;
+        }
+
+        .hero-meta-item .num {
+            font-family: var(--display);
+            font-size: 2.4rem;
+            font-weight: 300;
+            color: var(--forest);
+            line-height: 1;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .hero-meta-item .num em {
+            color: var(--terracotta);
+        }
+
+        .hero-meta-item .lbl {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--ink-soft);
+        }
+
+        /* hero visual */
+        .hero-visual {
+            position: relative;
+            z-index: 1;
+            height: 80vh;
+            min-height: 580px;
+            animation: fadeIn 1.4s ease 0.5s both;
+        }
+
+        .hero-img-main {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 75%;
+            height: 75%;
+            border-radius: 200px 200px 30px 30px;
+            overflow: hidden;
+            background: linear-gradient(160deg, #c9b894, #8a9a7b);
+            box-shadow: 0 30px 80px rgba(45, 58, 42, 0.2);
+        }
+
+        .hero-img-main svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-img-accent {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            height: 45%;
+            border-radius: 30px 30px 30px 30px;
+            overflow: hidden;
+            background: linear-gradient(140deg, #d49278, #b8674a);
+            box-shadow: 0 20px 60px rgba(184, 103, 74, 0.25);
+            border: 8px solid var(--cream);
+        }
+
+        .hero-img-accent svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-badge {
+            position: absolute;
+            top: 25%;
+            left: -2%;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: var(--cream);
+            border: 1px solid var(--forest);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: var(--display);
+            font-size: 0.85rem;
+            color: var(--forest);
+            line-height: 1.2;
+            padding: 1rem;
+            z-index: 3;
+            animation: spin 30s linear infinite;
+        }
+
+        .hero-badge-inner {
+            animation: spin 30s linear infinite reverse;
+        }
+
+        .hero-badge em {
+            color: var(--terracotta);
+            display: block;
+            font-size: 1.4rem;
+            margin: 0.2rem 0;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ---------- marquee ---------- */
+        .marquee {
+            background: var(--forest);
+            color: var(--cream);
+            padding: 1.4rem 0;
+            overflow: hidden;
+            border-top: 1px solid rgba(244, 237, 225, 0.1);
+            border-bottom: 1px solid rgba(244, 237, 225, 0.1);
+        }
+
+        .marquee-track {
+            display: flex;
+            gap: 4rem;
+            animation: scroll 40s linear infinite;
+            white-space: nowrap;
+        }
+
+        .marquee-item {
+            font-family: var(--display);
+            font-style: italic;
+            font-size: 1.4rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+        }
+
+        .marquee-item::after {
+            content: '✦';
+            color: var(--terracotta-soft);
+            font-style: normal;
+        }
+
+        @keyframes scroll {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* ---------- sections ---------- */
+        section {
+            padding: 7rem 3rem;
+            position: relative;
+        }
+
+        .section-header {
+            max-width: 1300px;
+            margin: 0 auto 5rem;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 4rem;
+            align-items: end;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2.5rem, 5vw, 4.2rem);
+            line-height: 1;
+            color: var(--forest);
+        }
+
+        .section-header h2 em {
+            color: var(--terracotta);
+        }
+
+        .section-header p {
+            color: var(--ink-soft);
+            font-size: 1.05rem;
+            max-width: 460px;
+            line-height: 1.7;
+        }
+
+        /* ---------- HOW IT WORKS ---------- */
+        .how {
+            background: var(--pearl);
+        }
+
+        .how-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            counter-reset: step;
+        }
+
+        .how-card {
+            counter-increment: step;
+            position: relative;
+            padding: 2.5rem 2rem;
+        }
+
+        .how-card::before {
+            content: counter(step, decimal-leading-zero);
+            font-family: var(--display);
+            font-style: italic;
+            font-size: 5rem;
+            font-weight: 300;
+            color: var(--terracotta);
+            opacity: 0.4;
+            line-height: 1;
+            display: block;
+            margin-bottom: 1.5rem;
+        }
+
+        .how-card h3 {
+            font-size: 1.7rem;
+            margin-bottom: 0.9rem;
+            color: var(--forest);
+        }
+
+        .how-card p {
+            color: var(--ink-soft);
+            line-height: 1.7;
+        }
+
+        .how-card:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 5rem;
+            right: -1.5rem;
+            width: 1.5rem;
+            height: 1px;
+            background: var(--sage);
+        }
+
+        /* ---------- SERVICES ---------- */
+        .services {
+            background: var(--cream);
+        }
+
+        .services-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .service-card {
+            background: var(--pearl);
+            border: 1px solid rgba(45, 58, 42, 0.1);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: grid;
+            grid-template-columns: 100px 1fr auto;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .service-card:hover {
+            background: var(--forest);
+            color: var(--cream);
+            transform: translateY(-4px);
+        }
+
+        .service-card:hover .service-name,
+        .service-card:hover .service-desc,
+        .service-card:hover .service-price,
+        .service-card:hover .service-time {
+            color: var(--cream);
+        }
+
+        .service-card:hover .service-illus {
+            background: var(--terracotta);
+        }
+
+        .service-card:hover .service-arrow {
+            transform: translate(4px, -4px);
+            color: var(--terracotta-soft);
+        }
+
+        .service-illus {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--sage);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            flex-shrink: 0;
+        }
+
+        .service-illus svg {
+            width: 50px;
+            height: 50px;
+            stroke: var(--cream);
+            fill: none;
+            stroke-width: 1.2;
+        }
+
+        .service-info {
+            min-width: 0;
+        }
+
+        .service-tag {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--terracotta);
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .service-card:hover .service-tag {
+            color: var(--terracotta-soft);
+        }
+
+        .service-name {
+            font-family: var(--display);
+            font-size: 1.55rem;
+            font-weight: 400;
+            color: var(--forest);
+            margin-bottom: 0.4rem;
+            transition: color 0.3s ease;
+        }
+
+        .service-desc {
+            font-size: 0.88rem;
+            color: var(--ink-soft);
+            line-height: 1.55;
+            margin-bottom: 0.6rem;
+            transition: color 0.3s ease;
+        }
+
+        .service-time {
+            font-size: 0.78rem;
+            color: var(--sage-deep);
+            font-style: italic;
+            transition: color 0.3s ease;
+        }
+
+        .service-meta {
+            text-align: right;
+            align-self: start;
+            padding-top: 0.5rem;
+        }
+
+        .service-price {
+            font-family: var(--display);
+            font-size: 1.6rem;
+            font-weight: 400;
+            color: var(--forest);
+            transition: color 0.3s ease;
+            line-height: 1;
+        }
+
+        .service-price small {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        .service-arrow {
+            margin-top: 0.8rem;
+            color: var(--forest);
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-size: 1.2rem;
+        }
+
+        .services-cta {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        /* ---------- ABOUT ---------- */
+        .about {
+            background: var(--forest);
+            color: var(--cream);
+            padding: 8rem 3rem;
+        }
+
+        .about-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .about-visual {
+            position: relative;
+            aspect-ratio: 4/5;
+        }
+
+        .about-img {
+            position: absolute;
+            inset: 0;
+            border-radius: 8px 200px 8px 200px;
+            overflow: hidden;
+            background: linear-gradient(160deg, #d49278, #8a9a7b);
+        }
+
+        .about-img svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .about-quote {
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 240px;
+            background: var(--terracotta);
+            padding: 1.8rem;
+            border-radius: 4px;
+            font-family: var(--display);
+            font-style: italic;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            color: var(--cream);
+        }
+
+        .about-quote::before {
+            content: '"';
+            font-size: 3rem;
+            line-height: 0;
+            position: relative;
+            top: 0.6rem;
+            margin-right: 0.3rem;
+        }
+
+        .about-content .eyebrow {
+            color: var(--terracotta-soft);
+        }
+
+        .about-content h2 {
+            font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+            margin: 1.5rem 0 2rem;
+            line-height: 1.05;
+            color: var(--cream);
+        }
+
+        .about-content h2 em {
+            color: var(--terracotta-soft);
+        }
+
+        .about-content p {
+            margin-bottom: 1.2rem;
+            color: rgba(244, 237, 225, 0.85);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .about-credentials {
+            margin-top: 2.5rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(244, 237, 225, 0.2);
+        }
+
+        .credential {
+            font-size: 0.85rem;
+            color: rgba(244, 237, 225, 0.85);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        .credential::before {
+            content: '✦';
+            color: var(--terracotta-soft);
+            flex-shrink: 0;
+        }
+
+        /* ---------- AREAS ---------- */
+        .areas {
+            background: var(--cream);
+            padding: 7rem 3rem;
+        }
+
+        .areas-wrap {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .areas-text h2 {
+            font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+            line-height: 1;
+            color: var(--forest);
+            margin: 1rem 0 1.8rem;
+        }
+
+        .areas-text h2 em {
+            color: var(--terracotta);
+        }
+
+        .areas-text p {
+            color: var(--ink-soft);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .areas-list {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+
+        .area-item {
+            font-family: var(--display);
+            font-size: 1.3rem;
+            color: var(--forest);
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(45, 58, 42, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .area-item small {
+            font-family: var(--sans);
+            font-size: 0.7rem;
+            color: var(--sage-deep);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .map-illustration {
+            aspect-ratio: 1.1/1;
+            position: relative;
+            background: var(--pearl);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(45, 58, 42, 0.1);
+        }
+
+        .map-illustration svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ---------- TESTIMONIALS ---------- */
+        .testimonials {
+            background: var(--cream-deep);
+            padding: 7rem 3rem;
+        }
+
+        .testimonials-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .testimonial {
+            background: var(--pearl);
+            padding: 2.5rem;
+            border-radius: 4px;
+            position: relative;
+            border-top: 3px solid var(--terracotta);
+        }
+
+        .testimonial-stars {
+            color: var(--gold);
+            font-size: 1.1rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 1.2rem;
+        }
+
+        .testimonial p {
+            font-family: var(--display);
+            font-size: 1.15rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--forest);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-top: 1px solid rgba(45, 58, 42, 0.1);
+            padding-top: 1.2rem;
+        }
+
+        .testimonial-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--sage);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cream);
+            font-family: var(--display);
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        .testimonial-name {
+            font-weight: 500;
+            color: var(--forest);
+            font-size: 0.92rem;
+        }
+
+        .testimonial-where {
+            font-size: 0.78rem;
+            color: var(--sage-deep);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        /* ---------- BOOKING ---------- */
+        .booking {
+            background: var(--cream);
+            padding: 8rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booking::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -10%;
+            width: 70%;
+            height: 140%;
+            background: radial-gradient(ellipse, rgba(184, 103, 74, 0.08), transparent 60%);
+            z-index: 0;
+        }
+
+        .booking-wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 5rem;
+            align-items: start;
+        }
+
+        .booking-info h2 {
+            font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+            line-height: 1;
+            color: var(--forest);
+            margin: 1rem 0 1.5rem;
+        }
+
+        .booking-info h2 em {
+            color: var(--terracotta);
+        }
+
+        .booking-info p {
+            color: var(--ink-soft);
+            line-height: 1.7;
+            margin-bottom: 1.3rem;
+        }
+
+        .deposit-card {
+            margin-top: 2rem;
+            padding: 1.8rem;
+            background: var(--forest);
+            color: var(--cream);
+            border-radius: 8px;
+            border-left: 4px solid var(--terracotta);
+        }
+
+        .deposit-card .deposit-amount {
+            font-family: var(--display);
+            font-size: 2.2rem;
+            color: var(--terracotta-soft);
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+
+        .deposit-card p {
+            color: rgba(244, 237, 225, 0.85);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .booking-form {
+            background: var(--pearl);
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 30px 80px rgba(45, 58, 42, 0.08);
+            border: 1px solid rgba(45, 58, 42, 0.06);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--sage-deep);
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.95rem 1rem;
+            background: var(--cream);
+            border: 1px solid rgba(45, 58, 42, 0.15);
+            font-family: var(--sans);
+            font-size: 0.95rem;
+            color: var(--ink);
+            transition: border-color 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--forest);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 1.1rem;
+            margin-top: 0.8rem;
+            background: var(--forest);
+            color: var(--cream);
+            border: none;
+            font-family: var(--sans);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border-radius: 999px;
+        }
+
+        .form-submit:hover {
+            background: var(--terracotta);
+        }
+
+        .stripe-note {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .stripe-lock {
+            width: 14px;
+            height: 14px;
+            fill: var(--sage-deep);
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            background: var(--forest);
+            color: var(--cream);
+            padding: 5rem 3rem 2rem;
+        }
+
+        .footer-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid rgba(244, 237, 225, 0.15);
+        }
+
+
+
+        .footer-brand p {
+            margin-top: 1.2rem;
+            color: rgba(244, 237, 225, 0.7);
+            line-height: 1.7;
+            max-width: 320px;
+            font-size: 0.95rem;
+        }
+
+        .footer-col h4 {
+            font-family: var(--sans);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            margin-bottom: 1.5rem;
+            color: var(--terracotta-soft);
+            font-weight: 500;
+        }
+
+        .footer-col a,
+        .footer-col p {
+            display: block;
+            color: rgba(244, 237, 225, 0.75);
+            text-decoration: none;
+            font-size: 0.92rem;
+            margin-bottom: 0.7rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-col a:hover {
+            color: var(--terracotta-soft);
+        }
+
+        .socials {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .social {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(244, 237, 225, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cream);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social:hover {
+            background: var(--terracotta);
+            border-color: var(--terracotta);
+        }
+
+        .social svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .footer-bottom {
+            max-width: 1300px;
+            margin: 2rem auto 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: rgba(244, 237, 225, 0.5);
+        }
+
+        /* ---------- mobile ---------- */
+        @media (max-width: 1024px) {
+            nav {
+                padding: 1.2rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            section {
+                padding: 5rem 1.5rem;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 7rem 1.5rem 3rem;
+                gap: 3rem;
+            }
+
+            .hero-visual {
+                height: 60vh;
+                min-height: 420px;
+            }
+
+            .hero-badge {
+                width: 100px;
+                height: 100px;
+                font-size: 0.7rem;
+                left: 5%;
+            }
+
+            .section-header {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                margin-bottom: 3rem;
+            }
+
+            .how-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .how-card:not(:last-child)::after {
+                display: none;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-card {
+                grid-template-columns: 70px 1fr;
+            }
+
+            .service-illus {
+                width: 70px;
+                height: 70px;
+            }
+
+            .service-meta {
+                grid-column: 1 / -1;
+                text-align: left;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 0.5rem;
+                padding-top: 1rem;
+                border-top: 1px solid rgba(45, 58, 42, 0.1);
+            }
+
+            .about-grid,
+            .areas-wrap,
+            .booking-wrap {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .hero-meta {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .areas-list {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-form {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============ NAV ============ -->
+    <nav id="nav">
+        <a href="#" class="logo">
+            <img src="logo.png" alt="Ruta Naturals" class="logo-img">
+        </a>
+        <ul class="nav-links">
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#about">Meet Ruta</a></li>
+            <li><a href="#areas">Service Area</a></li>
+            <li><a href="#book" class="btn">Book Visit <span class="btn-arrow">→</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-eyebrow eyebrow">Concierge Facial Spa · North Port, FL</div>
+            <h1>The sanctuary you deserve, <em>without</em> leaving <span class="underline">home.</span></h1>
+            <p class="hero-lede">
+                Twenty-eight years of master esthetician craft, arriving at your door. Professional-grade treatments and clinical results in the complete privacy of your own space. Forget traffic, waiting rooms, and rushed appointments. Reclaim your time with a bespoke, unhurried experience designed to restore your skin and quiet your mind.
+            </p>
+            <div class="hero-cta">
+                <a href="#book" class="btn">Book a Visit <span class="btn-arrow">→</span></a>
+                <a href="#services" class="btn btn-outline">Explore Treatments</a>
+            </div>
+            <div class="hero-meta">
+                <div class="hero-meta-item">
+                    <span class="num"><em>28</em>+</span>
+                    <span class="lbl">Years Master Expertise</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="num"><em>5</em>★</span>
+                    <span class="lbl">Rated Experience</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="num">✓</span>
+                    <span class="lbl">Medical-Grade Equipment</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="hero-img-main">
+                <!-- abstract botanical/face SVG -->
+                <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                        <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#e8d4b8" />
+                            <stop offset="100%" stop-color="#c9b894" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="400" height="500" fill="url(#skin)" />
+                    <!-- abstract face -->
+                    <ellipse cx="200" cy="240" rx="115" ry="150" fill="#d8c8ad" opacity="0.6" />
+                    <ellipse cx="200" cy="240" rx="95" ry="130" fill="#e8d4b8" opacity="0.7" />
+                    <!-- soft features -->
+                    <ellipse cx="170" cy="220" rx="6" ry="3" fill="#5b6e52" opacity="0.4" />
+                    <ellipse cx="230" cy="220" rx="6" ry="3" fill="#5b6e52" opacity="0.4" />
+                    <path d="M 180 290 Q 200 300 220 290" stroke="#b8674a" stroke-width="1.5" fill="none"
+                        opacity="0.5" />
+                    <!-- botanical leaves -->
+                    <g opacity="0.55">
+                        <path d="M 60 380 Q 90 340 130 360 Q 110 400 70 410 Z" fill="#5b6e52" />
+                        <path d="M 130 360 L 90 410" stroke="#5b6e52" stroke-width="1" />
+                        <path d="M 280 60 Q 320 80 340 130 Q 300 130 270 100 Z" fill="#8a9a7b" />
+                        <path d="M 270 100 L 340 130" stroke="#8a9a7b" stroke-width="1" />
+                        <path d="M 320 400 Q 350 380 370 410 Q 350 430 320 430 Z" fill="#5b6e52" />
+                    </g>
+                    <!-- glow circles -->
+                    <circle cx="320" cy="200" r="40" fill="#f4ede1" opacity="0.3" />
+                    <circle cx="80" cy="180" r="25" fill="#f4ede1" opacity="0.4" />
+                </svg>
+            </div>
+            <div class="hero-img-accent">
+                <svg viewBox="0 0 300 250" preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                        <linearGradient id="bottle" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#d49278" />
+                            <stop offset="100%" stop-color="#b8674a" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="250" fill="url(#bottle)" />
+                    <!-- product bottle -->
+                    <rect x="120" y="90" width="60" height="100" rx="4" fill="#f4ede1" opacity="0.95" />
+                    <rect x="135" y="70" width="30" height="25" rx="2" fill="#2d3a2a" />
+                    <rect x="125" y="125" width="50" height="20" fill="#5b6e52" opacity="0.9" />
+                    <text x="150" y="139" text-anchor="middle" fill="#f4ede1" font-family="serif" font-size="9"
+                        font-style="italic">RUTA</text>
+                    <!-- botanical sprigs -->
+                    <g opacity="0.8" fill="#2d3a2a">
+                        <path d="M 60 150 Q 80 120 100 140 Q 90 165 70 165 Z" />
+                        <path d="M 200 180 Q 220 160 240 180 Q 230 200 210 200 Z" />
+                        <circle cx="90" cy="80" r="4" />
+                        <circle cx="220" cy="60" r="3" />
+                        <circle cx="50" cy="100" r="3" />
+                    </g>
+                </svg>
+            </div>
+            <div class="hero-badge">
+                <div class="hero-badge-inner">
+                    Free <em>Lymphatic</em> Massage<br />· with every visit ·
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ MARQUEE ============ -->
+    <div class="marquee">
+        <div class="marquee-track">
+            <div class="marquee-item">HIFU Lifting</div>
+            <div class="marquee-item">Signature Facial</div>
+            <div class="marquee-item">IPL Photo Therapy</div>
+            <div class="marquee-item">Body Contouring</div>
+            <div class="marquee-item">Lymphatic Drainage</div>
+            <div class="marquee-item">Carboxy Therapy</div>
+            <div class="marquee-item">Radio Frequency</div>
+            <div class="marquee-item">Foot Detox</div>
+            <!-- duplicate for seamless scroll -->
+            <div class="marquee-item">HIFU Lifting</div>
+            <div class="marquee-item">Signature Facial</div>
+            <div class="marquee-item">IPL Photo Therapy</div>
+            <div class="marquee-item">Body Contouring</div>
+            <div class="marquee-item">Lymphatic Drainage</div>
+            <div class="marquee-item">Carboxy Therapy</div>
+            <div class="marquee-item">Radio Frequency</div>
+            <div class="marquee-item">Foot Detox</div>
+        </div>
+    </div>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="how" id="how">
+        <div class="section-header">
+            <div>
+                <div class="eyebrow">SEAMLESS CONVENIENCE</div>
+                <h2>Your sanctuary, activated in <em>three steps.</em></h2>
+            </div>
+            <p>
+                True luxury is having the best of both worlds. We bring the advanced technology, sterile equipment, and clinical formulations of a high-end studio directly into your living room. No compromises. Just visible, lasting results and the ultimate comfort of staying exactly where you are.
+            </p>
+        </div>
+        <div class="how-grid">
+            <div class="how-card">
+                <h3>01 / Curate Your Experience</h3>
+                <p>Select your bespoke treatment and preferred time. A simple reservation secures your private session.</p>
+            </div>
+            <div class="how-card">
+                <h3>02 / We Arrive Fully Prepared</h3>
+                <p>We bring the sterile tools, premium clinical devices, and hand-crafted formulations. You simply provide the space.</p>
+            </div>
+            <div class="how-card">
+                <h3>03 / Transform & Linger</h3>
+                <p>Experience clinical-grade results and a complimentary lymphatic massage. When we leave, you remain in your own quiet comfort—no drive home required.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ SERVICES ============ -->
+    <section class="services" id="services">
+        <div class="section-header">
+            <div>
+                <div class="eyebrow">BESPOKE TREATMENTS</div>
+                <h2>Tailored precision for <em>visible renewal.</em></h2>
+            </div>
+            <p>
+                Every treatment is executed with medical-grade equipment and formulated for your exact skin profile. Complimentary lymphatic massage included.
+            </p>
+        </div>
+        <div class="services-grid">
+
+            <!-- HIFU FACIAL -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <circle cx="25" cy="25" r="18" />
+                        <circle cx="25" cy="25" r="12" />
+                        <circle cx="25" cy="25" r="6" />
+                        <line x1="25" y1="2" x2="25" y2="10" />
+                        <line x1="25" y1="40" x2="25" y2="48" />
+                        <line x1="2" y1="25" x2="10" y2="25" />
+                        <line x1="40" y1="25" x2="48" y2="25" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Most Popular</span>
+                    <h3 class="service-name">HIFU Facial Lifting</h3>
+                    <p class="service-desc">Non-invasive ultrasound that tightens skin, lifts contours, and stimulates
+                        collagen. Visible results, zero downtime.</p>
+                    <div class="service-time">90 min · 1 visit</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$320<small>+</small></div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+            <!-- SIGNATURE FACIAL -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <path d="M25 8 Q35 8 38 18 Q40 30 32 38 Q25 44 18 38 Q10 30 12 18 Q15 8 25 8 Z" />
+                        <path d="M20 22 Q22 20 24 22" />
+                        <path d="M26 22 Q28 20 30 22" />
+                        <path d="M22 30 Q25 33 28 30" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Best Value</span>
+                    <h3 class="service-name">Signature Facial</h3>
+                    <p class="service-desc">Cleanse, exfoliate, extract, mask, massage. Ruta's signature ritual using
+                        her hand-formulated organic products.</p>
+                    <div class="service-time">75 min · 1 visit</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$180</div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+            <!-- IPL -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <path d="M25 5 L30 20 L45 22 L33 32 L37 47 L25 38 L13 47 L17 32 L5 22 L20 20 Z" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Skin Renewal</span>
+                    <h3 class="service-name">IPL Photo Facial</h3>
+                    <p class="service-desc">Pulsed light targets sun damage, age spots, redness, and uneven tone.
+                        Especially effective for Florida sun damage.</p>
+                    <div class="service-time">60 min · series recommended</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$240</div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+            <!-- RADIO FREQUENCY -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <path d="M5 25 Q15 15 25 25 T 45 25" />
+                        <path d="M5 32 Q15 22 25 32 T 45 32" />
+                        <path d="M5 18 Q15 8 25 18 T 45 18" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Anti-Aging</span>
+                    <h3 class="service-name">Radio Frequency Facial</h3>
+                    <p class="service-desc">Deep heat tightens skin, smooths fine lines, and remodels collagen — a
+                        gentler alternative to HIFU.</p>
+                    <div class="service-time">60 min · 1 visit</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$200</div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+            <!-- BODY CONTOURING -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <path
+                            d="M25 5 Q32 5 32 15 L32 22 Q40 25 38 35 L35 45 Q30 47 25 47 Q20 47 15 45 L12 35 Q10 25 18 22 L18 15 Q18 5 25 5 Z" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Body</span>
+                    <h3 class="service-name">Body Contouring & Sculpting</h3>
+                    <p class="service-desc">Cavitation, RF, and lymphatic combined to sculpt problem areas — abdomen,
+                        arms, thighs.</p>
+                    <div class="service-time">90 min · series recommended</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$280</div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+            <!-- LYMPHATIC PRESSO -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <circle cx="25" cy="15" r="6" />
+                        <circle cx="15" cy="30" r="5" />
+                        <circle cx="35" cy="30" r="5" />
+                        <circle cx="25" cy="42" r="4" />
+                        <line x1="25" y1="21" x2="15" y2="25" />
+                        <line x1="25" y1="21" x2="35" y2="25" />
+                        <line x1="15" y1="35" x2="25" y2="38" />
+                        <line x1="35" y1="35" x2="25" y2="38" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Wellness</span>
+                    <h3 class="service-name">Lymphatic Pressotherapy</h3>
+                    <p class="service-desc">Compression therapy that drains the lymphatic system — reduces swelling,
+                        boosts circulation, supports detox.</p>
+                    <div class="service-time">45 min · 1 visit</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$140</div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+            <!-- BACK FACIAL -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <path d="M15 8 L35 8 L37 20 L40 35 L35 45 L15 45 L10 35 L13 20 Z" />
+                        <line x1="25" y1="8" x2="25" y2="45" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Body</span>
+                    <h3 class="service-name">Back Facial</h3>
+                    <p class="service-desc">A full clarifying facial for the back — deep cleanse, extractions, hydrating
+                        mask. Perfect before resort wear.</p>
+                    <div class="service-time">60 min · 1 visit</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$160</div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+            <!-- EXPRESS FACIAL -->
+            <div class="service-card">
+                <div class="service-illus">
+                    <svg viewBox="0 0 50 50">
+                        <circle cx="25" cy="25" r="20" />
+                        <line x1="25" y1="10" x2="25" y2="25" />
+                        <line x1="25" y1="25" x2="35" y2="30" />
+                    </svg>
+                </div>
+                <div class="service-info">
+                    <span class="service-tag">Quick Glow</span>
+                    <h3 class="service-name">Express Facial</h3>
+                    <p class="service-desc">Deep cleanse, exfoliation, and a glow-restoring mask. Ideal for a refresh
+                        between full sessions.</p>
+                    <div class="service-time">45 min · 1 visit</div>
+                </div>
+                <div class="service-meta">
+                    <div class="service-price">$110</div>
+                    <div class="service-arrow">↗</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="services-cta">
+            <a href="#book" class="btn">Book Your Treatment <span class="btn-arrow">→</span></a>
+        </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="about" id="about">
+        <div class="about-grid">
+            <div class="about-visual">
+                <div class="about-img">
+                    <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice">
+                        <defs>
+                            <linearGradient id="ruta" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#d49278" />
+                                <stop offset="50%" stop-color="#c9a085" />
+                                <stop offset="100%" stop-color="#8a9a7b" />
+                            </linearGradient>
+                        </defs>
+                        <rect width="400" height="500" fill="url(#ruta)" />
+                        <!-- portrait silhouette -->
+                        <ellipse cx="200" cy="200" rx="80" ry="100" fill="#2d3a2a" opacity="0.18" />
+                        <path d="M 120 320 Q 120 280 160 270 L 240 270 Q 280 280 280 320 L 280 500 L 120 500 Z"
+                            fill="#2d3a2a" opacity="0.18" />
+                        <!-- features -->
+                        <circle cx="175" cy="190" r="3" fill="#2d3a2a" opacity="0.4" />
+                        <circle cx="225" cy="190" r="3" fill="#2d3a2a" opacity="0.4" />
+                        <path d="M 185 240 Q 200 250 215 240" stroke="#2d3a2a" stroke-width="1.5" fill="none"
+                            opacity="0.4" />
+                        <!-- botanical -->
+                        <g opacity="0.4" fill="#2d3a2a">
+                            <path d="M 50 400 Q 70 370 100 380 Q 90 410 60 415 Z" />
+                            <path d="M 320 70 Q 350 90 360 130 Q 330 130 310 100 Z" />
+                            <path d="M 350 380 Q 370 360 385 380 Q 375 400 355 400 Z" />
+                        </g>
+                    </svg>
+                </div>
+                <div class="about-quote">
+                    I treat every face with the care I'd want for my own.
+                </div>
+            </div>
+            <div class="about-content">
+                <div class="eyebrow">MEET RUTA</div>
+                <h2>Masterful hands. Twenty-eight years of <em>refinement.</em></h2>
+                <p>
+                    Expertise cannot be rushed. As a licensed master esthetician and CIDESCO-trained specialist, I have spent nearly three decades perfecting my craft in high-end studios. Now based on the Sun Coast, I bring my proprietary, hand-formulated organics and clinical knowledge directly to you.
+                </p>
+                <p>
+                    I don't follow passing trends—I read your skin, understand your goals, and deliver precise, transformative results with uncompromising care.
+                </p>
+                <div class="about-credentials">
+                    <div class="credential">Licensed Master Esthetician (FL & IL)</div>
+                    <div class="credential">CIDESCO-trained</div>
+                    <div class="credential">Hand-formulated organic skincare</div>
+                    <div class="credential">Insured & sterilized equipment</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ SERVICE AREAS ============ -->
+    <section class="areas" id="areas">
+        <div class="areas-wrap">
+            <div class="areas-text">
+                <div class="eyebrow">EXCLUSIVE SERVICE AREA</div>
+                <h2>Serving the Sun Coast's <em>finest homes.</em></h2>
+                <p>
+                    Operating discreetly across the Sun Coast. We bring the luxury spa experience to your door with zero travel fees within our primary service zones. Limited availability. For surrounding estates, private arrangements can be made.
+                </p>
+                <div class="areas-list">
+                    <div class="area-item">North Port <small>Home Base</small></div>
+                    <div class="area-item">Port Charlotte <small>15 min</small></div>
+                    <div class="area-item">Venice <small>20 min</small></div>
+                    <div class="area-item">Englewood <small>25 min</small></div>
+                </div>
+            </div>
+            <div class="map-illustration">
+                <svg viewBox="0 0 500 450" preserveAspectRatio="xMidYMid slice">
+                    <!-- base / water -->
+                    <rect width="500" height="450" fill="#ebe1cf" />
+                    <!-- gulf -->
+                    <path d="M 0 200 L 80 210 L 130 240 L 180 280 L 200 340 L 150 400 L 0 410 Z" fill="#a8b8a0"
+                        opacity="0.6" />
+                    <!-- land mass -->
+                    <path
+                        d="M 100 50 L 500 30 L 500 450 L 200 450 L 150 400 L 200 340 L 180 280 L 130 240 L 80 210 L 0 200 L 0 50 Z"
+                        fill="#d8c8ad" opacity="0.55" />
+                    <!-- charlotte harbor inlet -->
+                    <path d="M 130 240 L 180 280 L 230 290 L 280 270 L 250 240 L 200 230 Z" fill="#a8b8a0"
+                        opacity="0.65" />
+                    <!-- roads -->
+                    <g stroke="#5b6e52" stroke-width="0.8" fill="none" opacity="0.4" stroke-dasharray="3 4">
+                        <path d="M 50 100 Q 200 130 350 90" />
+                        <path d="M 120 200 L 280 180 L 400 220" />
+                        <path d="M 200 350 L 320 330 L 420 360" />
+                    </g>
+                    <!-- coverage circle -->
+                    <circle cx="250" cy="220" r="160" fill="#b8674a" opacity="0.08" stroke="#b8674a" stroke-width="1"
+                        stroke-dasharray="4 4" />
+                    <!-- city pins -->
+                    <!-- Venice -->
+                    <g>
+                        <circle cx="180" cy="140" r="6" fill="#b8674a" />
+                        <circle cx="180" cy="140" r="14" fill="none" stroke="#b8674a" opacity="0.4" />
+                        <text x="195" y="138" font-family="Cormorant Garamond, serif" font-size="14" font-style="italic"
+                            fill="#2d3a2a">Venice</text>
+                    </g>
+                    <!-- North Port (HOME) -->
+                    <g>
+                        <circle cx="280" cy="220" r="9" fill="#2d3a2a" />
+                        <circle cx="280" cy="220" r="9" fill="#b8674a" />
+                        <circle cx="280" cy="220" r="20" fill="none" stroke="#2d3a2a" stroke-width="1.5" />
+                        <circle cx="280" cy="220" r="28" fill="none" stroke="#2d3a2a" opacity="0.3" />
+                        <text x="295" y="218" font-family="Fraunces, serif" font-size="16" font-weight="500"
+                            fill="#2d3a2a">North Port</text>
+                        <text x="295" y="234" font-family="Cormorant Garamond, serif" font-size="11" font-style="italic"
+                            fill="#b8674a">— home base</text>
+                    </g>
+                    <!-- Port Charlotte -->
+                    <g>
+                        <circle cx="220" cy="290" r="6" fill="#b8674a" />
+                        <circle cx="220" cy="290" r="14" fill="none" stroke="#b8674a" opacity="0.4" />
+                        <text x="235" y="294" font-family="Cormorant Garamond, serif" font-size="14" font-style="italic"
+                            fill="#2d3a2a">Port Charlotte</text>
+                    </g>
+                    <!-- Englewood -->
+                    <g>
+                        <circle cx="140" cy="320" r="6" fill="#b8674a" />
+                        <circle cx="140" cy="320" r="14" fill="none" stroke="#b8674a" opacity="0.4" />
+                        <text x="155" y="324" font-family="Cormorant Garamond, serif" font-size="14" font-style="italic"
+                            fill="#2d3a2a">Englewood</text>
+                    </g>
+                    <!-- compass -->
+                    <g transform="translate(440, 380)" opacity="0.7">
+                        <circle r="20" fill="none" stroke="#5b6e52" stroke-width="0.8" />
+                        <path d="M 0 -16 L 4 0 L 0 16 L -4 0 Z" fill="#b8674a" />
+                        <text y="-25" text-anchor="middle" font-family="serif" font-size="11" fill="#5b6e52"
+                            font-style="italic">N</text>
+                    </g>
+                    <!-- gulf label -->
+                    <text x="60" y="280" font-family="Cormorant Garamond, serif" font-size="13" font-style="italic"
+                        fill="#5b6e52" opacity="0.7">Gulf of Mexico</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ TESTIMONIALS ============ -->
+    <section class="testimonials">
+        <div class="section-header">
+            <div>
+                <div class="eyebrow">CLIENT EXPERIENCES</div>
+                <h2>Quiet praise from <em>discerning clients.</em></h2>
+            </div>
+            <p>
+                A small selection from over a thousand happy clients, gathered across nearly three decades.
+            </p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial">
+                <div class="testimonial-stars">★★★★★</div>
+                <p>Ruta possesses the most intuitive, knowledgeable hands. After my first HIFU session, my jawline was visibly sculpted, and the convenience of staying home was pure luxury. Unmatched expertise.</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">M</div>
+                    <div>
+                        <div class="testimonial-name">Maria K.</div>
+                        <div class="testimonial-where">North Port</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-stars">★★★★★</div>
+                <p>The ultimate indulgence. I brewed tea, she transformed my sunroom into a clinical spa, and 90 minutes later I was glowing. No rushing to the car afterward—just pure, lingering relaxation.</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">D</div>
+                    <div>
+                        <div class="testimonial-name">Diane R.</div>
+                        <div class="testimonial-where">Venice</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-stars">★★★★★</div>
+                <p>I have visited half the high-end spas on the Sun Coast. Ruta’s private treatment is in a different echelon. Her proprietary formulations and clinical technique deliver results that far exceed a standard spa visit.</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">L</div>
+                    <div>
+                        <div class="testimonial-name">Linda S.</div>
+                        <div class="testimonial-where">Port Charlotte</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ BOOKING ============ -->
+    <section class="booking" id="book">
+        <div class="booking-wrap">
+            <div class="booking-info">
+                <div class="eyebrow">SECURE YOUR TIME</div>
+                <h2>Reserve your <em>private session.</em></h2>
+                <p>
+                    Select your treatment and preferred window. A nominal $25 deposit, secured via Stripe, reserves your appointment and is applied entirely to your service. We will confirm your exact time personally within hours.
+                </p>
+                <p>
+                    <em>*Availability is strictly limited to ensure premium care.</em>
+                </p>
+                <div class="deposit-card">
+                    <div class="deposit-amount">$25</div>
+                    <p>Booking deposit — secured by Stripe, applied directly toward your treatment total. Your card is charged only after Ruta confirms the appointment.</p>
+                </div>
+            </div>
+            <div class="booking-action" style="display: flex; align-items: center; justify-content: center; background: var(--pearl); border: 1px solid rgba(45, 58, 42, 0.08); border-radius: 12px; padding: 4rem 2rem; text-align: center;">
+                <div>
+                    <h3 style="font-family: var(--display); font-size: 1.5rem; color: var(--forest); margin-bottom: 1rem;">Ready to begin?</h3>
+                    <a href="book.html" class="btn" style="font-size: 0.9rem; padding: 1.2rem 2.5rem;">Book Your Visit Now →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                    <img src="logo.png" alt="Ruta Naturals" class="logo-img-footer">
+                </a>
+                <p>Ruta Naturals. The luxury of clinical perfection, delivered.</p>
+                <div class="socials">
+                    <a href="#" class="social" aria-label="Facebook"><svg viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.408.593 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.794.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.323-.592 1.323-1.325V1.325C24 .593 23.407 0 22.675 0z" />
+                        </svg></a>
+                    <a href="#" class="social" aria-label="Instagram"><svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                        </svg></a>
+                    <a href="#" class="social" aria-label="LinkedIn"><svg viewBox="0 0 24 24">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Visit</h4>
+                <p>North Port, Florida</p>
+                <p>Mon–Sat · 9am – 7pm</p>
+                <p>By appointment only</p>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <a href="tel:8885525752">(888) 552-5752</a>
+                <a href="mailto:rutanaturalle@gmail.com">rutanaturalle@gmail.com</a>
+            </div>
+            <div class="footer-col">
+                <h4>Explore</h4>
+                <a href="#services">Services</a>
+                <a href="#about">About Ruta</a>
+                <a href="#book">Book a Visit</a>
+                <a href="#">Gift Cards</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div>© 2026 Ruta Naturals. Crafted with care.</div>
+            <div>Licensed FL & IL · Insured</div>
+        </div>
+    </footer>
+
+    <style>
+      /* ---- mobile hamburger ---- */
+      .hamburger {
+        display: none; flex-direction: column; gap: 5px;
+        background: none; border: none; cursor: pointer; padding: 4px;
+      }
+      .hamburger span {
+        display: block; width: 24px; height: 1.5px;
+        background: var(--ink); transition: all 0.35s ease;
+        transform-origin: center;
+      }
+      .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+      .mobile-nav {
+        display: none; position: fixed; inset: 0; z-index: 99;
+        background: var(--forest); flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 2.5rem; padding: 3rem;
+      }
+      .mobile-nav.open { display: flex; animation: fadeIn 0.3s ease; }
+      .mobile-nav a {
+        color: var(--cream); text-decoration: none;
+        font-family: var(--display); font-size: 2rem; font-weight: 300;
+        font-style: italic; opacity: 0.9; transition: opacity 0.2s;
+      }
+      .mobile-nav a:hover { opacity: 1; color: var(--terracotta-soft); }
+      .mobile-nav .btn { font-style: normal; font-family: var(--sans); font-size: 0.82rem; }
+      @media (max-width: 1024px) { .hamburger { display: flex; } }
+
+      /* ---- form loading/error states ---- */
+      .form-submit.loading {
+        opacity: 0.7; pointer-events: none;
+      }
+      .form-submit.loading::after {
+        content: ' …';
+      }
+      .form-error {
+        margin-top: 0.8rem; padding: 0.8rem 1rem;
+        background: rgba(184,103,74,0.12); border-radius: 4px;
+        color: var(--terracotta); font-size: 0.85rem; display: none;
+      }
+      .form-error.visible { display: block; }
+    </style>
+
+    <!-- mobile nav overlay -->
+    <div class="mobile-nav" id="mobile-nav">
+      <a href="#how" onclick="closeMobileNav()">How It Works</a>
+      <a href="#services" onclick="closeMobileNav()">Services</a>
+      <a href="#about" onclick="closeMobileNav()">Meet Ruta</a>
+      <a href="#areas" onclick="closeMobileNav()">Service Area</a>
+      <a href="#book" class="btn" onclick="closeMobileNav()">Book Visit →</a>
+    </div>
+
+    <script>
+      /* ── nav scroll ── */
+      const nav = document.getElementById('nav');
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 60);
+      });
+
+      /* ── mobile nav ── */
+      const mobileNav = document.getElementById('mobile-nav');
+      let burger;
+      function initHamburger() {
+        burger = document.createElement('button');
+        burger.className = 'hamburger'; burger.setAttribute('aria-label','Menu');
+        burger.innerHTML = '<span></span><span></span><span></span>';
+        burger.addEventListener('click', () => {
+          burger.classList.toggle('open');
+          mobileNav.classList.toggle('open');
+          document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+        });
+        nav.appendChild(burger);
+      }
+      function closeMobileNav() {
+        mobileNav.classList.remove('open');
+        if (burger) burger.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+      initHamburger();
+
+      /* ── scroll reveal ── */
+      const reveal = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.style.opacity = 1;
+            e.target.style.transform = 'translateY(0)';
+            reveal.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.how-card, .service-card, .testimonial, .area-item').forEach(el => {
+        el.style.opacity = 0;
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        reveal.observe(el);
+      });
+
+      /* ── service card → auto-select treatment in form ── */
+      document.querySelectorAll('.service-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const name = card.querySelector('.service-name')?.textContent.trim();
+          const price = card.querySelector('.service-price')?.textContent.replace(/[^\d]/g, '');
+          const sel = document.querySelector('#booking-form select');
+          if (!sel || !name) return;
+          for (const opt of sel.options) {
+            if (opt.text.includes(name.split(' ')[0])) { sel.value = opt.value; break; }
+          }
+          document.querySelector('#book')?.scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+
+      /* ── Service selection sets link to book page ── */
+    </script>
+
+</body>
+
+</html>
