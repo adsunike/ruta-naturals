@@ -37,41 +37,95 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const meta = session.metadata;
-    console.log('✅ Deposit paid:', meta);
-    
-    // Send email notification to the admins
-    const mailOptions = {
-      from: `"Ruta Naturals Booking" <${process.env.SMTP_USER}>`,
-      to: ['rutanaturalle@gmail.com', 'adsunike@gmail.com'],
-      subject: `New Booking Deposit: ${meta.firstName} ${meta.lastName}`,
-      html: `
-        <h2>New Booking Deposit Received!</h2>
-        <p><strong>Name:</strong> ${meta.firstName} ${meta.lastName}</p>
-        <p><strong>Email:</strong> ${session.customer_email}</p>
-        <p><strong>Phone:</strong> ${meta.phone}</p>
-        <p><strong>Address:</strong> ${meta.address}</p>
-        <p><strong>Treatment:</strong> ${meta.treatment}</p>
-        <p><strong>Date:</strong> ${meta.date}</p>
-        <p><strong>Notes:</strong> ${meta.notes}</p>
-        <br>
-        <p>The $25 deposit has been successfully captured via Stripe.</p>
-      `
-    };
+    const isVideo = meta.treatment && meta.treatment.includes('video-consultation');
+    console.log('✅ Payment completed:', meta.treatment);
+
+    const adminSubject = isVideo
+      ? `New Video Consultation — ${meta.firstName} ${meta.lastName} · ${meta.date}`
+      : `New Home Visit Booking — ${meta.firstName} ${meta.lastName} · ${meta.date}`;
+
+    const adminBody = isVideo ? `
+      <h2 style="color:#2d3a2a;">New Video Consultation Booking</h2>
+      <p><strong>Client:</strong> ${meta.firstName} ${meta.lastName}</p>
+      <p><strong>Email:</strong> ${session.customer_email}</p>
+      <p><strong>Phone:</strong> ${meta.phone}</p>
+      <p><strong>Preferred Call Time:</strong> ${meta.date}</p>
+      <p><strong>Notes:</strong> ${meta.notes || 'None'}</p>
+      <hr/>
+      <p>Paid: <strong>$25.00</strong> (full payment for video consultation)</p>
+      <p style="color:#b8674a;"><em>Please send the client a Zoom or Google Meet link at their email address above.</em></p>
+    ` : `
+      <h2 style="color:#2d3a2a;">New Komfort Flow Home Visit Booking</h2>
+      <p><strong>Client:</strong> ${meta.firstName} ${meta.lastName}</p>
+      <p><strong>Email:</strong> ${session.customer_email}</p>
+      <p><strong>Phone:</strong> ${meta.phone}</p>
+      <p><strong>Date/Time:</strong> ${meta.date}</p>
+      <p><strong>Address:</strong> ${meta.address}</p>
+      <p><strong>Notes:</strong> ${meta.notes || 'None'}</p>
+      <hr/>
+      <p>Deposit paid: <strong>$25.00</strong> | Balance at visit: <strong>$175.00</strong></p>
+    `;
+
+    const clientSubject = isVideo
+      ? `Your video consultation with Ruta is confirmed`
+      : `Your Komfort Flow session is reserved`;
+
+    const clientBody = isVideo ? `
+      <div style="font-family:'Georgia',serif;color:#2d3a2a;max-width:600px;margin:0 auto;line-height:1.7;">
+        <h2 style="font-weight:400;color:#b8674a;">Hello ${meta.firstName},</h2>
+        <p>Your video consultation with Ruta is confirmed and your $25 payment has been received.</p>
+        <div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;border:1px solid rgba(45,58,42,0.1);">
+          <h3 style="margin-top:0;font-size:16px;">Booking Summary</h3>
+          <p><strong>Service:</strong> Video Consultation (40 min)</p>
+          <p><strong>Preferred Time:</strong> ${meta.date}</p>
+          <p><strong>Amount Paid:</strong> $25.00 (full payment)</p>
+        </div>
+        <p>Ruta will send your Zoom or Google Meet link to this email within a few hours.</p>
+        <p>Warmly,<br/><strong>Ruta Naturals</strong></p>
+      </div>
+    ` : `
+      <div style="font-family:'Georgia',serif;color:#2d3a2a;max-width:600px;margin:0 auto;line-height:1.7;">
+        <h2 style="font-weight:400;color:#b8674a;">Hello ${meta.firstName},</h2>
+        <p>Your Komfort Flow Reset session has been reserved. Your $25 deposit has been received.</p>
+        <div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;border:1px solid rgba(45,58,42,0.1);">
+          <h3 style="margin-top:0;font-size:16px;">Booking Summary</h3>
+          <p><strong>Service:</strong> Komfort Flow Reset (75–90 min)</p>
+          <p><strong>Date/Time:</strong> ${meta.date}</p>
+          <p><strong>Address:</strong> ${meta.address}</p>
+          <p><strong>Deposit Paid:</strong> $25.00</p>
+          <p><strong>Balance at Visit:</strong> $175.00</p>
+        </div>
+        <p>Ruta will confirm your appointment personally within a few hours. See you soon.</p>
+        <p>Warmly,<br/><strong>Ruta Naturals</strong></p>
+      </div>
+    `;
 
     try {
       if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        await transporter.sendMail(mailOptions);
-        console.log('✅ Admin notification emails sent');
+        await transporter.sendMail({
+          from: `"Ruta Naturals Booking" <${process.env.SMTP_USER}>`,
+          to: ['rutanaturalle@gmail.com', 'adsunike@gmail.com'],
+          subject: adminSubject,
+          html: adminBody,
+        });
+        await transporter.sendMail({
+          from: `"Ruta Naturals" <${process.env.SMTP_USER}>`,
+          to: session.customer_email,
+          subject: clientSubject,
+          html: clientBody,
+        });
+        console.log('✅ Emails sent for', meta.treatment);
       } else {
-        console.log('⚠️ SMTP credentials not configured. Skipping email notification.');
+        console.log('⚠️ SMTP not configured. Skipping emails.');
       }
     } catch (emailErr) {
-      console.error('❌ Failed to send email:', emailErr.message);
+      console.error('❌ Email error:', emailErr.message);
     }
   }
 
   res.sendStatus(200);
 });
+
 
 // ── middleware ─────────────────────────────────────────────────────────────
 app.use(express.json());
@@ -89,7 +143,16 @@ app.post('/create-checkout-session', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
+  const isVideo = treatment.includes('video-consultation');
   const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+
+  // Determine correct Stripe product name and description
+  const productName = isVideo
+    ? 'Ruta Naturals — Video Consultation'
+    : 'Ruta Naturals — Komfort Flow Reset (Deposit)';
+  const productDesc = isVideo
+    ? `40-min video call · ${date} · ${firstName} ${lastName}`
+    : `Home visit · ${date} · ${firstName} ${lastName}`;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -99,10 +162,10 @@ app.post('/create-checkout-session', async (req, res) => {
         {
           price_data: {
             currency: 'usd',
-            unit_amount: 2500,   // $25.00 in cents
+            unit_amount: 2500,   // $25.00 in cents (full for video, deposit for in-home)
             product_data: {
-              name: 'Ruta Naturals — Booking Deposit',
-              description: `${treatment} · ${date} · ${firstName} ${lastName}`,
+              name: productName,
+              description: productDesc,
               images: [],
             },
           },
@@ -110,10 +173,10 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       customer_email: email,
-      // store all booking info as Stripe metadata (visible in dashboard)
       metadata: {
         firstName, lastName, phone,
-        address, treatment, date,
+        address: address || 'N/A',
+        treatment, date,
         notes: notes || '',
       },
       success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
@@ -127,65 +190,6 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// ── create Video Consultation Request ──────────────────────────────────────
-app.post('/api/consultation', async (req, res) => {
-  const { firstName, lastName, email, phone, notes, callTime } = req.body;
-
-  if (!email || !firstName || !callTime) {
-    return res.status(400).json({ error: 'Missing required fields.' });
-  }
-
-  // 1. Email to Admin
-  const adminMailOptions = {
-    from: `"Ruta Naturals Booking" <${process.env.SMTP_USER}>`,
-    to: ['rutanaturalle@gmail.com', 'adsunike@gmail.com'],
-    subject: `New Video Consultation Request — ${firstName} ${lastName}`,
-    html: `
-      <h2>New Video Consultation Request</h2>
-      <p><strong>Name:</strong> ${firstName} ${lastName}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Phone:</strong> ${phone}</p>
-      <p><strong>Preferred Time:</strong> ${callTime}</p>
-      <p><strong>Notes:</strong> ${notes || 'None'}</p>
-    `
-  };
-
-  // 2. Email to Client
-  const clientMailOptions = {
-    from: `"Ruta Naturals" <${process.env.SMTP_USER}>`,
-    to: email,
-    subject: `Your consultation with Ruta is being scheduled`,
-    html: `
-      <div style="font-family: 'Georgia', serif; color: #2d3a2a; max-width: 600px; margin: 0 auto; line-height: 1.6;">
-        <h2 style="font-weight: 400; color: #b8674a;">Hello ${firstName},</h2>
-        <p>Thank you for requesting a video consultation. Ruta will review your details and send you a calendar invite with the Zoom link within a few hours.</p>
-        <div style="background: #fbf7ee; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid rgba(45,58,42,0.1);">
-          <h3 style="margin-top: 0; font-size: 16px;">Request Summary</h3>
-          <p style="margin: 5px 0;"><strong>Preferred Time:</strong> ${callTime}</p>
-          <p style="margin: 5px 0;"><strong>Phone:</strong> ${phone}</p>
-          ${notes ? \`<p style="margin: 5px 0;"><strong>Notes:</strong> \${notes}</p>\` : ''}
-        </div>
-        <p>We look forward to speaking with you.</p>
-        <p>Warmly,<br><strong>Ruta Naturals</strong></p>
-      </div>
-    `
-  };
-
-  try {
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      await transporter.sendMail(adminMailOptions);
-      await transporter.sendMail(clientMailOptions);
-      console.log(\`✅ Consultation emails sent for \${email}\`);
-    } else {
-      console.log('⚠️ SMTP credentials not configured. Skipping emails.');
-    }
-    const bookingId = 'VC-' + Math.floor(Math.random()*10000);
-    res.json({ success: true, bookingId });
-  } catch (err) {
-    console.error('❌ Failed to send consultation email:', err.message);
-    res.status(500).json({ error: 'Failed to process request.' });
-  }
-});
 
 // ── start ──────────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production' || require.main === module) {

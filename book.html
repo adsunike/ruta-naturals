@@ -930,20 +930,16 @@
         <span>Treatment</span>
         <span id="line-treatment">—</span>
       </div>
-      <div class="summary-line">
-        <span>Lymphatic massage</span>
-        <span style="color: var(--sage-deep); font-style: italic;">complimentary</span>
-      </div>
       <div class="summary-line total">
         <span>Total</span>
         <span id="line-total">—</span>
       </div>
     </div>
 
-    <div class="summary-due">
-      <div class="lbl">Due now (deposit)</div>
-      <div class="amt">$25.00</div>
-      <small>Applied to your total. Remaining balance paid in person at your visit.</small>
+    <div class="summary-due" id="summary-due">
+      <div class="lbl" id="due-label">Due now</div>
+      <div class="amt" id="due-amount">$25.00</div>
+      <small id="due-note">Deposit applied to your total. Balance paid in person at your visit.</small>
     </div>
   </aside>
 
@@ -1006,13 +1002,18 @@
   document.getElementById('next-1').addEventListener('click', () => {
     const isVideo = state.treatment.name === 'video-consultation';
     if (isVideo) {
+      // Video consultation: skip calendar, go straight to details
       document.querySelector('[data-step="3"] .step-header p').textContent = 'How to reach you. Used only for your consultation.';
       document.getElementById('address-fields').style.display = 'none';
       document.getElementById('call-time-group').style.display = 'block';
-      document.getElementById('deposit-text').textContent = "No deposit required for a video consultation. Ruta will email you a calendar invite within a few hours.";
-      document.getElementById('pay-btn').textContent = "Request Free Consultation →";
+      // Video consultation is $25 full payment via Stripe
+      document.getElementById('deposit-text').textContent = 'A $25 payment secures your video consultation. This is the full cost — no additional balance.';
+      document.getElementById('pay-btn').textContent = 'Pay $25 & Book Call →';
       document.getElementById('sum-address').style.display = 'none';
-      document.querySelector('.summary-due').style.display = 'none';
+      // Update summary due panel for full payment
+      document.getElementById('due-label').textContent = 'Due now (full payment)';
+      document.getElementById('due-amount').textContent = '$25.00';
+      document.getElementById('due-note').textContent = 'Full payment for Video Consultation. Secured via Stripe.';
       document.getElementById('area-ok').style.display = 'none';
       document.getElementById('area-warn').style.display = 'none';
       goToStep(3);
@@ -1020,10 +1021,13 @@
       document.querySelector('[data-step="3"] .step-header p').textContent = 'Where Ruta should arrive and how to reach you. Used only for your booking.';
       document.getElementById('address-fields').style.display = 'block';
       document.getElementById('call-time-group').style.display = 'none';
-      document.getElementById('deposit-text').textContent = "A $25 deposit secures your appointment. It's applied directly toward your treatment total — the rest is paid in person.";
-      document.getElementById('pay-btn').textContent = "Pay $25 & Reserve →";
+      document.getElementById('deposit-text').textContent = "A $25 deposit secures your appointment. It's applied directly toward your $200 treatment total — the rest ($175) is paid in person.";
+      document.getElementById('pay-btn').textContent = 'Pay $25 Deposit & Reserve →';
       document.getElementById('sum-address').style.display = 'flex';
-      document.querySelector('.summary-due').style.display = 'block';
+      // Update summary due panel for deposit
+      document.getElementById('due-label').textContent = 'Due now (deposit)';
+      document.getElementById('due-amount').textContent = '$25.00';
+      document.getElementById('due-note').textContent = 'Deposit applied to your $200 total. Balance of $175 paid in person at your visit.';
       renderCalendar();
       goToStep(2);
     }
@@ -1293,35 +1297,19 @@
     };
 
     try {
-      if (isVideo) {
-        const res = await fetch('/api/consultation', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || 'Something went wrong.');
-        
-        document.getElementById('conf-id').textContent = 'VC-' + Math.floor(Math.random()*10000);
-        document.getElementById('conf-rows').innerHTML = `
-          <div class="conf-row"><div class="lbl">Type</div><div class="val">Video Consultation</div></div>
-          <div class="conf-row"><div class="lbl">Preferred Time</div><div class="val">${d.callTime}</div></div>
-        `;
-        document.getElementById('conf-email').textContent = d.email;
-        goToStep(5);
-      } else {
-        const res  = await fetch('/create-checkout-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || 'Something went wrong.');
-        window.location.href = json.url;
-      }
+      // Both video consultation and in-home go through Stripe
+      const endpoint = '/create-checkout-session';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Something went wrong.');
+      window.location.href = json.url;
     } catch (err) {
       btn.disabled = false;
-      btn.innerHTML = isVideo ? 'Request Free Consultation →' : 'Pay $25 & Reserve →';
+      btn.innerHTML = isVideo ? 'Pay $25 &amp; Book Call →' : 'Pay $25 Deposit &amp; Reserve →';
       alert(err.message);
     }
   });
