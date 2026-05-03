@@ -1255,26 +1255,42 @@
   function renderConfirmDetails() {
     const d = state.details;
     const isVideo = state.treatment.name === 'video-consultation';
-    const dateStr = state.date ? `${monthNames[state.date.getMonth()]} ${state.date.getDate()}, ${state.date.getFullYear()}` : '';
-    document.getElementById('confirm-details').innerHTML = `
-      <div class="conf-row"><div class="lbl">Treatment</div><div class="val">${state.treatment.name}</div></div>
-      <div class="conf-row"><div class="lbl">Duration</div><div class="val">${state.treatment.duration} min</div></div>
-      ${isVideo ? \`<div class="conf-row"><div class="lbl">Preferred Call Time</div><div class="val">\${d.callTime}</div></div>\` : \`
-      <div class="conf-row"><div class="lbl">Date</div><div class="val">\${dateStr}</div></div>
-      <div class="conf-row"><div class="lbl">Time</div><div class="val">\${state.time}</div></div>\`}
-      <div class="conf-row"><div class="lbl">Client</div><div class="val">${d.first} ${d.last}</div></div>
-      <div class="conf-row"><div class="lbl">Email</div><div class="val">${d.email}</div></div>
-      <div class="conf-row"><div class="lbl">Phone</div><div class="val">${d.phone}</div></div>
-      ${!isVideo ? \`<div class="conf-row"><div class="lbl">Address</div><div class="val">\${d.address}<br/>\${d.city}, FL \${d.zip}</div></div>\` : ''}
-      ${d.notes ? \`<div class="conf-row"><div class="lbl">Notes</div><div class="val" style="font-style: italic;">\${d.notes}</div></div>\` : ''}
-      <div style="height: 1px; background: rgba(45,58,42,0.1); margin: 1rem 0;"></div>
-      <div class="conf-row"><div class="lbl">Treatment total</div><div class="val">$\${state.treatment.price.toFixed(2)}</div></div>
-      ${!isVideo ? \`
-      <div class="conf-row"><div class="lbl">Deposit (now)</div><div class="val" style="color: var(--terracotta);">$25.00</div></div>
-      <div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$\${(state.treatment.price - 25).toFixed(2)}</div></div>
-      \` : ''}
-    `;
+    const dateStr = state.date
+      ? monthNames[state.date.getMonth()] + ' ' + state.date.getDate() + ', ' + state.date.getFullYear()
+      : '';
+
+    const callTimeRow = isVideo
+      ? '<div class="conf-row"><div class="lbl">Preferred Call Time</div><div class="val">' + d.callTime + '</div></div>'
+      : '<div class="conf-row"><div class="lbl">Date</div><div class="val">' + dateStr + '</div></div>' +
+        '<div class="conf-row"><div class="lbl">Time</div><div class="val">' + state.time + '</div></div>';
+
+    const addressRow = !isVideo
+      ? '<div class="conf-row"><div class="lbl">Address</div><div class="val">' + d.address + '<br/>' + d.city + ', FL ' + d.zip + '</div></div>'
+      : '';
+
+    const notesRow = d.notes
+      ? '<div class="conf-row"><div class="lbl">Notes</div><div class="val" style="font-style:italic;">' + d.notes + '</div></div>'
+      : '';
+
+    const balanceRows = !isVideo
+      ? '<div class="conf-row"><div class="lbl">Deposit (now)</div><div class="val" style="color:var(--terracotta);">$25.00</div></div>' +
+        '<div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$' + (state.treatment.price - 25).toFixed(2) + '</div></div>'
+      : '';
+
+    document.getElementById('confirm-details').innerHTML =
+      '<div class="conf-row"><div class="lbl">Treatment</div><div class="val">' + state.treatment.name + '</div></div>' +
+      '<div class="conf-row"><div class="lbl">Duration</div><div class="val">' + state.treatment.duration + ' min</div></div>' +
+      callTimeRow +
+      '<div class="conf-row"><div class="lbl">Client</div><div class="val">' + d.first + ' ' + d.last + '</div></div>' +
+      '<div class="conf-row"><div class="lbl">Email</div><div class="val">' + d.email + '</div></div>' +
+      '<div class="conf-row"><div class="lbl">Phone</div><div class="val">' + d.phone + '</div></div>' +
+      addressRow +
+      notesRow +
+      '<div style="height:1px;background:rgba(45,58,42,0.1);margin:1rem 0;"></div>' +
+      '<div class="conf-row"><div class="lbl">Treatment total</div><div class="val">$' + state.treatment.price.toFixed(2) + '</div></div>' +
+      balanceRows;
   }
+
 
   // ============ PAY (REAL Stripe integration) ============
   document.getElementById('pay-btn').addEventListener('click', async () => {
