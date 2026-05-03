@@ -734,18 +734,18 @@
         <p>Choose your session to get started.</p>
       </div>
       <div class="treatments-grid">
-        <div class="treatment" data-name="video-consultation" data-price="25" data-duration="40" style="border-top: 3px solid var(--sage);">
+        <div class="treatment" data-name="video-consultation" data-price="25" data-duration="10" style="border-top: 3px solid var(--sage);">
           <span class="t-tag" style="color: var(--sage-deep);">START HERE</span>
           <div class="t-name">Video Consultation</div>
-          <div class="t-meta" style="font-style: italic; color: var(--sage-deep);">40 min · Zoom or Google Meet</div>
-          <p style="font-size: 0.9rem; color: var(--ink-soft); margin: 0.6rem 0 0.8rem; line-height: 1.5;">A private 40-minute video call with Ruta to assess your body, explain the Komfort Flow protocol, and plan your session.</p>
+          <div class="t-meta" style="font-style: italic; color: var(--sage-deep);">10 min · Zoom or Google Meet</div>
+          <p style="font-size: 0.9rem; color: var(--ink-soft); margin: 0.6rem 0 0.8rem; line-height: 1.5;">A private 10-minute video call with Ruta to assess your body, explain the Komfort Flow protocol, and plan your session.</p>
           <div class="t-price">$25</div>
           <div style="font-size: 0.7rem; color: var(--ink-soft); margin-top: 0.2rem;">Full payment · secured via Stripe</div>
         </div>
-        <div class="treatment" data-name="komfort-flow" data-price="200" data-duration="90" style="border-top: 3px solid var(--terracotta);">
+        <div class="treatment" data-name="komfort-flow" data-price="200" data-duration="60" style="border-top: 3px solid var(--terracotta);">
           <span class="t-tag" style="color: var(--terracotta);">SIGNATURE SESSION</span>
           <div class="t-name">Komfort Flow Reset</div>
-          <div class="t-meta" style="font-style: italic;">75–90 min · all modalities · in-home</div>
+          <div class="t-meta" style="font-style: italic;">~60 min · all modalities · in-home</div>
           <p style="font-size: 0.9rem; color: var(--ink-soft); margin: 0.6rem 0 0.8rem; line-height: 1.5;">The full integrated multi-modality protocol, delivered privately in your home. Adapts in real time to your body.</p>
           <div class="t-price">$200</div>
           <div style="font-size: 0.7rem; color: var(--ink-soft); margin-top: 0.2rem;">$25 deposit now · $175 balance at visit</div>
@@ -844,7 +844,7 @@
           <span>✓</span> <span id="area-ok-text">Great — you're inside Ruta's no-fee service area.</span>
         </div>
         <div class="area-warning" id="area-warn">
-          <strong>Heads up</strong> — that ZIP looks outside Ruta's primary area (North Port, Port Charlotte, Venice, Englewood). She may still be able to come, but a small travel fee may apply. She'll confirm by email before charging anything beyond the deposit.
+          <strong>Outside primary area</strong> — that ZIP is outside Ruta's service zone (North Port, Port Charlotte, Venice, Englewood). She may not be able to travel there. Please contact Ruta directly to confirm availability.
         </div>
         <div class="form-group" style="margin-top: 1.2rem;">
           <label>Notes for Ruta (optional)</label>
@@ -924,11 +924,19 @@
       <div class="lbl">Address</div>
       <div class="val">—</div>
     </div>
+    <div class="summary-row" id="sum-travel" style="display:none;">
+      <div class="lbl">Travel fee</div>
+      <div class="val" style="color: var(--warning);">+$15.00</div>
+    </div>
 
     <div class="summary-totals">
       <div class="summary-line">
         <span>Treatment</span>
         <span id="line-treatment">—</span>
+      </div>
+      <div class="summary-line" id="line-travel-row" style="display:none;">
+        <span>Travel fee</span>
+        <span style="color: var(--warning);">+$15.00</span>
       </div>
       <div class="summary-line total">
         <span>Total</span>
@@ -952,6 +960,7 @@
     treatment: null,    // {name, price, duration}
     date: null,         // Date object
     time: null,         // string like "10:00 AM"
+    travelFee: 0,       // $0 for North Port, $15 for surrounding areas
     details: {}
   };
 
@@ -1189,6 +1198,8 @@
     // Englewood
     '34223','34224'
   ]);
+  // North Port ZIPs (complimentary — no travel fee)
+  const northPortZips = new Set(['34286','34287','34288','34289','34291','34290']);
 
   function checkArea() {
     const zip = document.getElementById('f-zip').value.trim();
@@ -1204,15 +1215,28 @@
           '34285':'Venice','34292':'Venice','34293':'Venice','34275':'Venice',
           '34223':'Englewood','34224':'Englewood'
         };
-        document.getElementById('area-ok-text').textContent =
-          `Great — you're in ${cityMap[zip]}, inside Ruta's no-fee service area.`;
+        if (northPortZips.has(zip)) {
+          // No travel fee for North Port
+          state.travelFee = 0;
+          document.getElementById('area-ok-text').textContent = '✔ You’re in North Port — in-home visits are complimentary. No travel fee.';
+        } else {
+          // $15 travel fee for surrounding areas
+          state.travelFee = 15;
+          document.getElementById('area-ok-text').textContent =
+            'You’re in ' + cityMap[zip] + ' — a $15 travel fee applies, collected at your visit.';
+        }
+        updateSummary();
       } else {
         warn.classList.add('show');
         ok.classList.remove('show');
+        state.travelFee = 0;
+        updateSummary();
       }
     } else {
       ok.classList.remove('show');
       warn.classList.remove('show');
+      state.travelFee = 0;
+      updateSummary();
     }
     validateDetails();
   }
@@ -1274,11 +1298,14 @@
 
     const balanceRows = !isVideo
       ? '<div class="conf-row"><div class="lbl">Deposit (now)</div><div class="val" style="color:var(--terracotta);">$25.00</div></div>' +
-        '<div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$' + (state.treatment.price - 25).toFixed(2) + '</div></div>'
+        (state.travelFee > 0 ? '<div class="conf-row"><div class="lbl">Travel fee</div><div class="val" style="color:var(--warning);">+$15.00 (at visit)</div></div>' : '') +
+        '<div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$' + (state.treatment.price + state.travelFee - 25).toFixed(2) + '</div></div>'
       : '';
 
+    const treatmentDisplayName = state.treatment.name === 'video-consultation' ? 'Video Consultation' : 'Komfort Flow Reset';
+
     document.getElementById('confirm-details').innerHTML =
-      '<div class="conf-row"><div class="lbl">Treatment</div><div class="val">' + state.treatment.name + '</div></div>' +
+      '<div class="conf-row"><div class="lbl">Treatment</div><div class="val">' + treatmentDisplayName + '</div></div>' +
       '<div class="conf-row"><div class="lbl">Duration</div><div class="val">' + state.treatment.duration + ' min</div></div>' +
       callTimeRow +
       '<div class="conf-row"><div class="lbl">Client</div><div class="val">' + d.first + ' ' + d.last + '</div></div>' +
@@ -1306,10 +1333,11 @@
       email:     d.email,
       phone:     d.phone,
       address:   isVideo ? 'N/A (Video)' : `${d.address}, ${d.city}, FL ${d.zip}`,
-      treatment: `${state.treatment.name} — $${state.treatment.price}`,
+      treatment: isVideo ? 'video-consultation' : 'komfort-flow',
       date:      isVideo ? `Preferred Call Time: ${d.callTime}` : `${state.date.toDateString()} at ${state.time}`,
       notes:     d.notes,
-      callTime:  isVideo ? d.callTime : undefined
+      callTime:  isVideo ? d.callTime : undefined,
+      travelFee: state.travelFee
     };
 
     try {
@@ -1333,10 +1361,22 @@
   // ============ SUMMARY UPDATER ============
   function updateSummary() {
     if (state.treatment) {
-      document.querySelector('#sum-treatment .val').textContent = state.treatment.name;
+      const displayName = state.treatment.name === 'video-consultation' ? 'Video Consultation' : 'Komfort Flow Reset';
+      document.querySelector('#sum-treatment .val').textContent = displayName;
       document.querySelector('#sum-duration .val').textContent = state.treatment.duration + ' min';
       document.getElementById('line-treatment').textContent = '$' + state.treatment.price.toFixed(2);
-      document.getElementById('line-total').textContent = '$' + state.treatment.price.toFixed(2);
+      // Travel fee row
+      const travelRow = document.getElementById('line-travel-row');
+      const travelSumRow = document.getElementById('sum-travel');
+      if (state.travelFee > 0 && state.treatment.name !== 'video-consultation') {
+        travelRow.style.display = 'flex';
+        travelSumRow.style.display = 'flex';
+      } else {
+        travelRow.style.display = 'none';
+        travelSumRow.style.display = 'none';
+      }
+      const total = state.treatment.price + state.travelFee;
+      document.getElementById('line-total').textContent = '$' + total.toFixed(2);
     }
     if (state.date) {
       document.querySelector('#sum-date .val').innerHTML =

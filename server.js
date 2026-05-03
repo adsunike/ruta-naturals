@@ -89,11 +89,12 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         <p>Your Komfort Flow Reset session has been reserved. Your $25 deposit has been received.</p>
         <div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;border:1px solid rgba(45,58,42,0.1);">
           <h3 style="margin-top:0;font-size:16px;">Booking Summary</h3>
-          <p><strong>Service:</strong> Komfort Flow Reset (75–90 min)</p>
+          <p><strong>Service:</strong> Komfort Flow Reset (~60 min)</p>
           <p><strong>Date/Time:</strong> ${meta.date}</p>
           <p><strong>Address:</strong> ${meta.address}</p>
           <p><strong>Deposit Paid:</strong> $25.00</p>
-          <p><strong>Balance at Visit:</strong> $175.00</p>
+          ${meta.travelFee && meta.travelFee !== '0' ? `<p><strong>Travel Fee:</strong> $${meta.travelFee} (collected at visit)</p>` : ''}
+          <p><strong>Balance at Visit:</strong> $${(175 + Number(meta.travelFee || 0)).toFixed(2)}</p>
         </div>
         <p>Ruta will confirm your appointment personally within a few hours. See you soon.</p>
         <p>Warmly,<br/><strong>Ruta Naturals</strong></p>
@@ -135,7 +136,7 @@ app.use(express.static(path.join(__dirname)));   // serve index.html, success.ht
 app.post('/create-checkout-session', async (req, res) => {
   const {
     firstName, lastName, email, phone,
-    address, treatment, date, notes,
+    address, treatment, date, notes, travelFee,
   } = req.body;
 
   // basic server-side validation
@@ -143,6 +144,7 @@ app.post('/create-checkout-session', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
+  const fee = (travelFee && !isNaN(travelFee)) ? Number(travelFee) : 0;
   const isVideo = treatment.includes('video-consultation');
   const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
 
@@ -151,8 +153,8 @@ app.post('/create-checkout-session', async (req, res) => {
     ? 'Ruta Naturals — Video Consultation'
     : 'Ruta Naturals — Komfort Flow Reset (Deposit)';
   const productDesc = isVideo
-    ? `40-min video call · ${date} · ${firstName} ${lastName}`
-    : `Home visit · ${date} · ${firstName} ${lastName}`;
+    ? `10-min video call · ${date} · ${firstName} ${lastName}`
+    : `Home visit (~60 min) · ${date} · ${firstName} ${lastName}${fee > 0 ? ' · $15 travel fee at visit' : ''}`;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -178,6 +180,7 @@ app.post('/create-checkout-session', async (req, res) => {
         address: address || 'N/A',
         treatment, date,
         notes: notes || '',
+        travelFee: String(fee),
       },
       success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${baseUrl}/book.html`,
