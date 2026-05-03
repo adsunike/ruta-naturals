@@ -749,6 +749,17 @@
           <p style="font-size: 0.9rem; color: var(--ink-soft); margin: 0.6rem 0 0.8rem; line-height: 1.5;">The full integrated multi-modality protocol, delivered privately in your home. Adapts in real time to your body.</p>
           <div class="t-price">$200</div>
           <div style="font-size: 0.7rem; color: var(--ink-soft); margin-top: 0.2rem;">$25 deposit now · $175 balance at visit</div>
+          <div style="margin-top: 1rem; padding: 0.7rem 0.9rem; background: rgba(184,103,74,0.08); border-radius: 6px; border: 1px solid rgba(184,103,74,0.22);">
+            <div style="font-size: 0.72rem; font-weight: 600; color: var(--terracotta); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">&#127881; Group Offer &mdash; 20% Off</div>
+            <div style="font-size: 0.82rem; color: var(--ink-soft); margin-bottom: 0.6rem;">2 or more people at the same home? Everyone saves 20% &mdash; <strong>$160 per person</strong>.</div>
+            <div style="display: flex; align-items: center; gap: 0.8rem;" id="guest-counter">
+              <span style="font-size: 0.8rem; color: var(--forest); font-weight: 500;">Guests:</span>
+              <button type="button" id="guest-minus" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(45,58,42,0.25);background:var(--cream);font-size:1rem;cursor:pointer;line-height:1;">&#8722;</button>
+              <span id="guest-count" style="font-family:var(--display);font-size:1.1rem;min-width:1.4rem;text-align:center;">1</span>
+              <button type="button" id="guest-plus" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(45,58,42,0.25);background:var(--cream);font-size:1rem;cursor:pointer;line-height:1;">&#43;</button>
+              <span id="guest-price-hint" style="font-size: 0.78rem; color: var(--sage-deep); font-style: italic;"></span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="step-actions">
@@ -938,6 +949,10 @@
         <span>Travel fee</span>
         <span style="color: var(--warning);">+$15.00</span>
       </div>
+      <div class="summary-line" id="line-discount-row" style="display:none;color:var(--sage-deep);">
+        <span id="line-discount-label">Group discount (20%)</span>
+        <span id="line-discount-amt"></span>
+      </div>
       <div class="summary-line total">
         <span>Total</span>
         <span id="line-total">—</span>
@@ -961,6 +976,7 @@
     date: null,         // Date object
     time: null,         // string like "10:00 AM"
     travelFee: 0,       // $0 for North Port, $15 for surrounding areas
+    guests: 1,          // number of people — 2+ triggers 20% group discount
     details: {}
   };
 
@@ -1296,10 +1312,21 @@
       ? '<div class="conf-row"><div class="lbl">Notes</div><div class="val" style="font-style:italic;">' + d.notes + '</div></div>'
       : '';
 
+    const isKomfort = !isVideo;
+    const hasGroupDiscount = isKomfort && state.guests >= 2;
+    const perPersonPrice = hasGroupDiscount ? state.treatment.price * 0.8 : state.treatment.price;
+    const treatmentTotal = perPersonPrice * (isKomfort ? state.guests : 1);
+    const grandTotal = treatmentTotal + state.travelFee;
+
+    const guestRow = isKomfort && state.guests >= 2
+      ? '<div class="conf-row"><div class="lbl">Guests</div><div class="val">' + state.guests + ' people — $160/person (20% off)</div></div>'
+      : '';
+
     const balanceRows = !isVideo
       ? '<div class="conf-row"><div class="lbl">Deposit (now)</div><div class="val" style="color:var(--terracotta);">$25.00</div></div>' +
+        guestRow +
         (state.travelFee > 0 ? '<div class="conf-row"><div class="lbl">Travel fee</div><div class="val" style="color:var(--warning);">+$15.00 (at visit)</div></div>' : '') +
-        '<div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$' + (state.treatment.price + state.travelFee - 25).toFixed(2) + '</div></div>'
+        '<div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$' + (grandTotal - 25).toFixed(2) + '</div></div>'
       : '';
 
     const treatmentDisplayName = state.treatment.name === 'video-consultation' ? 'Video Consultation' : 'Komfort Flow Reset';
@@ -1337,7 +1364,9 @@
       date:      isVideo ? `Preferred Call Time: ${d.callTime}` : `${state.date.toDateString()} at ${state.time}`,
       notes:     d.notes,
       callTime:  isVideo ? d.callTime : undefined,
-      travelFee: state.travelFee
+      travelFee: state.travelFee,
+      guests: isVideo ? 1 : state.guests,
+      groupDiscount: (!isVideo && state.guests >= 2) ? String((state.treatment.price * state.guests * 0.2).toFixed(2)) : '0'
     };
 
     try {
@@ -1358,24 +1387,60 @@
     }
   });
 
+  // ============ GUEST COUNTER WIRING ============
+  document.getElementById('guest-plus').addEventListener('click', () => {
+    if (state.guests < 8) { state.guests++; updateGuestUI(); updateSummary(); }
+  });
+  document.getElementById('guest-minus').addEventListener('click', () => {
+    if (state.guests > 1) { state.guests--; updateGuestUI(); updateSummary(); }
+  });
+
+  function updateGuestUI() {
+    document.getElementById('guest-count').textContent = state.guests;
+    const hint = document.getElementById('guest-price-hint');
+    if (state.guests >= 2) {
+      hint.textContent = state.guests + ' × $160 = $' + (state.guests * 160).toFixed(0) + ' total (20% off)';
+    } else {
+      hint.textContent = '';
+    }
+  }
+
   // ============ SUMMARY UPDATER ============
   function updateSummary() {
     if (state.treatment) {
       const displayName = state.treatment.name === 'video-consultation' ? 'Video Consultation' : 'Komfort Flow Reset';
       document.querySelector('#sum-treatment .val').textContent = displayName;
       document.querySelector('#sum-duration .val').textContent = state.treatment.duration + ' min';
+      // Guests & discount (only for komfort-flow)
+      const isKomfort = state.treatment.name === 'komfort-flow';
+      const hasGroupDiscount = isKomfort && state.guests >= 2;
+      const perPersonPrice = hasGroupDiscount ? state.treatment.price * 0.8 : state.treatment.price;
+      const treatmentTotal = perPersonPrice * (isKomfort ? state.guests : 1);
+      const discountAmt = isKomfort ? (state.treatment.price * state.guests - treatmentTotal) : 0;
+
       document.getElementById('line-treatment').textContent = '$' + state.treatment.price.toFixed(2);
+
+      // Discount row
+      const discountRow = document.getElementById('line-discount-row');
+      if (hasGroupDiscount) {
+        discountRow.style.display = 'flex';
+        document.getElementById('line-discount-label').textContent = 'Group discount (20% × ' + state.guests + ')';
+        document.getElementById('line-discount-amt').textContent = '-$' + discountAmt.toFixed(2);
+      } else {
+        discountRow.style.display = 'none';
+      }
+
       // Travel fee row
       const travelRow = document.getElementById('line-travel-row');
       const travelSumRow = document.getElementById('sum-travel');
-      if (state.travelFee > 0 && state.treatment.name !== 'video-consultation') {
+      if (state.travelFee > 0 && !isNaN(state.travelFee) && state.treatment.name !== 'video-consultation') {
         travelRow.style.display = 'flex';
         travelSumRow.style.display = 'flex';
       } else {
         travelRow.style.display = 'none';
         travelSumRow.style.display = 'none';
       }
-      const total = state.treatment.price + state.travelFee;
+      const total = treatmentTotal + state.travelFee;
       document.getElementById('line-total').textContent = '$' + total.toFixed(2);
     }
     if (state.date) {

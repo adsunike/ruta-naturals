@@ -93,8 +93,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           <p><strong>Date/Time:</strong> ${meta.date}</p>
           <p><strong>Address:</strong> ${meta.address}</p>
           <p><strong>Deposit Paid:</strong> $25.00</p>
-          ${meta.travelFee && meta.travelFee !== '0' ? `<p><strong>Travel Fee:</strong> $${meta.travelFee} (collected at visit)</p>` : ''}
-          <p><strong>Balance at Visit:</strong> $${(175 + Number(meta.travelFee || 0)).toFixed(2)}</p>
+          ${meta.guests && meta.guests !== '1' ? `<p><strong>Guests:</strong> ${meta.guests} people &mdash; 20% group discount applied ($160/person)</p>` : ''}
+          ${meta.travelFee && meta.travelFee !== '0' ? `<p><strong>Travel Fee:</strong> $${''}${meta.travelFee} (collected at visit)</p>` : ''}
+          <p><strong>Balance at Visit:</strong> $${((Number(meta.guests || 1) * (meta.guests !== '1' ? 160 : 200)) - 25 + Number(meta.travelFee || 0)).toFixed(2)}</p>
         </div>
         <p>Ruta will confirm your appointment personally within a few hours. See you soon.</p>
         <p>Warmly,<br/><strong>Ruta Naturals</strong></p>
@@ -136,7 +137,7 @@ app.use(express.static(path.join(__dirname)));   // serve index.html, success.ht
 app.post('/create-checkout-session', async (req, res) => {
   const {
     firstName, lastName, email, phone,
-    address, treatment, date, notes, travelFee,
+    address, treatment, date, notes, travelFee, guests, groupDiscount,
   } = req.body;
 
   // basic server-side validation
@@ -181,6 +182,8 @@ app.post('/create-checkout-session', async (req, res) => {
         treatment, date,
         notes: notes || '',
         travelFee: String(fee),
+        guests: String(guests || 1),
+        groupDiscount: String(groupDiscount || '0'),
       },
       success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${baseUrl}/book.html`,
