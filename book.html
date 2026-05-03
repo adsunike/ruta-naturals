@@ -734,6 +734,18 @@
         <p>All treatments include a complimentary lymphatic massage.</p>
       </div>
       <div class="treatments-grid">
+        <div class="treatment" data-name="video-consultation" data-price="0" data-duration="30">
+          <span class="t-tag">Free to start</span>
+          <div class="t-name">📹 Video Consultation</div>
+          <div class="t-meta">30 min · Zoom or Google Meet</div>
+          <div class="t-price">Free</div>
+        </div>
+        <div class="treatment" data-name="komfort-flow" data-price="200" data-duration="90">
+          <span class="t-tag">Signature Session</span>
+          <div class="t-name">Komfort Flow Reset</div>
+          <div class="t-meta">75–90 min · all modalities included</div>
+          <div class="t-price">$200</div>
+        </div>
         <div class="treatment" data-name="HIFU Facial Lifting" data-price="320" data-duration="90">
           <span class="t-tag">Most Popular</span>
           <div class="t-name">HIFU Facial Lifting</div>
@@ -848,19 +860,29 @@
             <input type="tel" id="f-phone" placeholder="(941) 555-0100" required />
           </div>
         </div>
-        <div class="form-group">
-          <label>Service Address</label>
-          <input type="text" id="f-address" placeholder="Street address" required />
+        <div id="address-fields">
+          <div class="form-group">
+            <label>Service Address</label>
+            <input type="text" id="f-address" placeholder="Street address" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" id="f-city" placeholder="e.g. North Port" required />
+            </div>
+            <div class="form-group">
+              <label>ZIP Code</label>
+              <input type="text" id="f-zip" placeholder="e.g. 34286" maxlength="5" required />
+            </div>
+          </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>City</label>
-            <input type="text" id="f-city" placeholder="e.g. North Port" required />
-          </div>
-          <div class="form-group">
-            <label>ZIP Code</label>
-            <input type="text" id="f-zip" placeholder="e.g. 34286" maxlength="5" required />
-          </div>
+        <div class="form-group" id="call-time-group" style="display: none;">
+          <label>Preferred Call Time</label>
+          <select id="f-call-time">
+            <option value="Morning (9am–12pm)">Morning (9am–12pm)</option>
+            <option value="Afternoon (12pm–4pm)">Afternoon (12pm–4pm)</option>
+            <option value="Evening (4pm–7pm)">Evening (4pm–7pm)</option>
+          </select>
         </div>
         <div class="area-confirmed" id="area-ok">
           <span>✓</span> <span id="area-ok-text">Great — you're inside Ruta's no-fee service area.</span>
@@ -884,7 +906,7 @@
       <div class="step-header">
         <div class="eyebrow">Final Step</div>
         <h1>Review & <em>reserve.</em></h1>
-        <p>A $25 deposit secures your appointment. It's applied directly toward your treatment total — the rest is paid in person.</p>
+        <p id="deposit-text">A $25 deposit secures your appointment. It's applied directly toward your treatment total — the rest is paid in person.</p>
       </div>
       <div class="form-card">
         <h3 style="font-family: var(--display); color: var(--forest); margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid rgba(45,58,42,0.1); font-size: 1.1rem;">Booking summary</h3>
@@ -1002,7 +1024,13 @@
   }
 
   document.querySelectorAll('[data-back]').forEach(btn => {
-    btn.addEventListener('click', () => goToStep(+btn.dataset.back));
+    btn.addEventListener('click', () => {
+      let backStep = +btn.dataset.back;
+      if (backStep === 2 && state.treatment && state.treatment.name === 'video-consultation') {
+        backStep = 1;
+      }
+      goToStep(backStep);
+    });
   });
 
   // ============ STEP 1: TREATMENTS ============
@@ -1020,8 +1048,40 @@
     });
   });
   document.getElementById('next-1').addEventListener('click', () => {
-    renderCalendar();
-    goToStep(2);
+    const isVideo = state.treatment.name === 'video-consultation';
+    if (isVideo) {
+      document.querySelector('[data-step="3"] .step-header p').textContent = 'How to reach you. Used only for your consultation.';
+      document.getElementById('address-fields').style.display = 'none';
+      document.getElementById('call-time-group').style.display = 'block';
+      document.getElementById('deposit-text').textContent = "No deposit required for a video consultation. Ruta will email you a calendar invite within a few hours.";
+      document.getElementById('pay-btn').textContent = "Request Free Consultation →";
+      document.getElementById('sum-address').style.display = 'none';
+      document.querySelector('.summary-due').style.display = 'none';
+      document.getElementById('area-ok').style.display = 'none';
+      document.getElementById('area-warn').style.display = 'none';
+      goToStep(3);
+    } else {
+      document.querySelector('[data-step="3"] .step-header p').textContent = 'Where Ruta should arrive and how to reach you. Used only for your booking.';
+      document.getElementById('address-fields').style.display = 'block';
+      document.getElementById('call-time-group').style.display = 'none';
+      document.getElementById('deposit-text').textContent = "A $25 deposit secures your appointment. It's applied directly toward your treatment total — the rest is paid in person.";
+      document.getElementById('pay-btn').textContent = "Pay $25 & Reserve →";
+      document.getElementById('sum-address').style.display = 'flex';
+      document.querySelector('.summary-due').style.display = 'block';
+      renderCalendar();
+      goToStep(2);
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceParam = urlParams.get('service');
+    if (serviceParam) {
+      const card = document.querySelector(`.treatment[data-name="${serviceParam}"]`);
+      if (card) {
+        card.click();
+      }
+    }
   });
 
   // ============ STEP 2: CALENDAR ============
@@ -1198,19 +1258,21 @@
   }
 
   function validateDetails() {
-    const fields = ['f-first','f-last','f-email','f-phone','f-address','f-city','f-zip'];
+    const isVideo = state.treatment && state.treatment.name === 'video-consultation';
+    const fields = isVideo ? ['f-first','f-last','f-email','f-phone'] : ['f-first','f-last','f-email','f-phone','f-address','f-city','f-zip'];
     const allFilled = fields.every(id => document.getElementById(id).value.trim().length > 0);
     const emailOk = /^\S+@\S+\.\S+$/.test(document.getElementById('f-email').value);
-    const zipOk = /^\d{5}$/.test(document.getElementById('f-zip').value);
+    const zipOk = isVideo ? true : /^\d{5}$/.test(document.getElementById('f-zip').value);
     document.getElementById('next-3').disabled = !(allFilled && emailOk && zipOk);
   }
 
   ['f-first','f-last','f-email','f-phone','f-address','f-city','f-zip','f-notes'].forEach(id => {
     document.getElementById(id).addEventListener('input', () => {
-      if (id === 'f-zip') checkArea();
+      if (id === 'f-zip' && !(state.treatment && state.treatment.name === 'video-consultation')) checkArea();
       else validateDetails();
     });
   });
+  document.getElementById('f-call-time').addEventListener('change', validateDetails);
 
   document.getElementById('next-3').addEventListener('click', () => {
     state.details = {
@@ -1221,7 +1283,8 @@
       address: document.getElementById('f-address').value,
       city: document.getElementById('f-city').value,
       zip: document.getElementById('f-zip').value,
-      notes: document.getElementById('f-notes').value
+      notes: document.getElementById('f-notes').value,
+      callTime: document.getElementById('f-call-time').value
     };
     renderConfirmDetails();
     updateSummary();
@@ -1231,21 +1294,25 @@
   // ============ STEP 4: CONFIRM ============
   function renderConfirmDetails() {
     const d = state.details;
+    const isVideo = state.treatment.name === 'video-consultation';
     const dateStr = state.date ? `${monthNames[state.date.getMonth()]} ${state.date.getDate()}, ${state.date.getFullYear()}` : '';
     document.getElementById('confirm-details').innerHTML = `
       <div class="conf-row"><div class="lbl">Treatment</div><div class="val">${state.treatment.name}</div></div>
       <div class="conf-row"><div class="lbl">Duration</div><div class="val">${state.treatment.duration} min</div></div>
-      <div class="conf-row"><div class="lbl">Date</div><div class="val">${dateStr}</div></div>
-      <div class="conf-row"><div class="lbl">Time</div><div class="val">${state.time}</div></div>
+      ${isVideo ? \`<div class="conf-row"><div class="lbl">Preferred Call Time</div><div class="val">\${d.callTime}</div></div>\` : \`
+      <div class="conf-row"><div class="lbl">Date</div><div class="val">\${dateStr}</div></div>
+      <div class="conf-row"><div class="lbl">Time</div><div class="val">\${state.time}</div></div>\`}
       <div class="conf-row"><div class="lbl">Client</div><div class="val">${d.first} ${d.last}</div></div>
       <div class="conf-row"><div class="lbl">Email</div><div class="val">${d.email}</div></div>
       <div class="conf-row"><div class="lbl">Phone</div><div class="val">${d.phone}</div></div>
-      <div class="conf-row"><div class="lbl">Address</div><div class="val">${d.address}<br/>${d.city}, FL ${d.zip}</div></div>
-      ${d.notes ? `<div class="conf-row"><div class="lbl">Notes</div><div class="val" style="font-style: italic;">${d.notes}</div></div>` : ''}
+      ${!isVideo ? \`<div class="conf-row"><div class="lbl">Address</div><div class="val">\${d.address}<br/>\${d.city}, FL \${d.zip}</div></div>\` : ''}
+      ${d.notes ? \`<div class="conf-row"><div class="lbl">Notes</div><div class="val" style="font-style: italic;">\${d.notes}</div></div>\` : ''}
       <div style="height: 1px; background: rgba(45,58,42,0.1); margin: 1rem 0;"></div>
-      <div class="conf-row"><div class="lbl">Treatment total</div><div class="val">$${state.treatment.price.toFixed(2)}</div></div>
+      <div class="conf-row"><div class="lbl">Treatment total</div><div class="val">$\${state.treatment.price.toFixed(2)}</div></div>
+      ${!isVideo ? \`
       <div class="conf-row"><div class="lbl">Deposit (now)</div><div class="val" style="color: var(--terracotta);">$25.00</div></div>
-      <div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$${(state.treatment.price - 25).toFixed(2)}</div></div>
+      <div class="conf-row"><div class="lbl">Balance at visit</div><div class="val">$\${(state.treatment.price - 25).toFixed(2)}</div></div>
+      \` : ''}
     `;
   }
 
@@ -1253,7 +1320,8 @@
   document.getElementById('pay-btn').addEventListener('click', async () => {
     const btn = document.getElementById('pay-btn');
     btn.disabled = true;
-    btn.innerHTML = 'Redirecting to secure payment...';
+    const isVideo = state.treatment.name === 'video-consultation';
+    btn.innerHTML = isVideo ? 'Submitting request...' : 'Redirecting to secure payment...';
     
     const d = state.details;
     const data = {
@@ -1261,24 +1329,43 @@
       lastName:  d.last,
       email:     d.email,
       phone:     d.phone,
-      address:   `${d.address}, ${d.city}, FL ${d.zip}`,
+      address:   isVideo ? 'N/A (Video)' : `${d.address}, ${d.city}, FL ${d.zip}`,
       treatment: `${state.treatment.name} — $${state.treatment.price}`,
-      date:      `${state.date.toDateString()} at ${state.time}`,
-      notes:     d.notes
+      date:      isVideo ? `Preferred Call Time: ${d.callTime}` : `${state.date.toDateString()} at ${state.time}`,
+      notes:     d.notes,
+      callTime:  isVideo ? d.callTime : undefined
     };
 
     try {
-      const res  = await fetch('/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Something went wrong.');
-      window.location.href = json.url;   // → Stripe hosted checkout
+      if (isVideo) {
+        const res = await fetch('/api/consultation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Something went wrong.');
+        
+        document.getElementById('conf-id').textContent = 'VC-' + Math.floor(Math.random()*10000);
+        document.getElementById('conf-rows').innerHTML = `
+          <div class="conf-row"><div class="lbl">Type</div><div class="val">Video Consultation</div></div>
+          <div class="conf-row"><div class="lbl">Preferred Time</div><div class="val">${d.callTime}</div></div>
+        `;
+        document.getElementById('conf-email').textContent = d.email;
+        goToStep(5);
+      } else {
+        const res  = await fetch('/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Something went wrong.');
+        window.location.href = json.url;
+      }
     } catch (err) {
       btn.disabled = false;
-      btn.innerHTML = 'Pay $25 & Reserve →';
+      btn.innerHTML = isVideo ? 'Request Free Consultation →' : 'Pay $25 & Reserve →';
       alert(err.message);
     }
   });

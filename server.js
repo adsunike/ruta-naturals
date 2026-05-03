@@ -127,7 +127,65 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
+// ── create Video Consultation Request ──────────────────────────────────────
+app.post('/api/consultation', async (req, res) => {
+  const { firstName, lastName, email, phone, notes, callTime } = req.body;
 
+  if (!email || !firstName || !callTime) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  // 1. Email to Admin
+  const adminMailOptions = {
+    from: `"Ruta Naturals Booking" <${process.env.SMTP_USER}>`,
+    to: ['rutanaturalle@gmail.com', 'adsunike@gmail.com'],
+    subject: `New Video Consultation Request — ${firstName} ${lastName}`,
+    html: `
+      <h2>New Video Consultation Request</h2>
+      <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone}</p>
+      <p><strong>Preferred Time:</strong> ${callTime}</p>
+      <p><strong>Notes:</strong> ${notes || 'None'}</p>
+    `
+  };
+
+  // 2. Email to Client
+  const clientMailOptions = {
+    from: `"Ruta Naturals" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Your consultation with Ruta is being scheduled`,
+    html: `
+      <div style="font-family: 'Georgia', serif; color: #2d3a2a; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+        <h2 style="font-weight: 400; color: #b8674a;">Hello ${firstName},</h2>
+        <p>Thank you for requesting a video consultation. Ruta will review your details and send you a calendar invite with the Zoom link within a few hours.</p>
+        <div style="background: #fbf7ee; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid rgba(45,58,42,0.1);">
+          <h3 style="margin-top: 0; font-size: 16px;">Request Summary</h3>
+          <p style="margin: 5px 0;"><strong>Preferred Time:</strong> ${callTime}</p>
+          <p style="margin: 5px 0;"><strong>Phone:</strong> ${phone}</p>
+          ${notes ? \`<p style="margin: 5px 0;"><strong>Notes:</strong> \${notes}</p>\` : ''}
+        </div>
+        <p>We look forward to speaking with you.</p>
+        <p>Warmly,<br><strong>Ruta Naturals</strong></p>
+      </div>
+    `
+  };
+
+  try {
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      await transporter.sendMail(adminMailOptions);
+      await transporter.sendMail(clientMailOptions);
+      console.log(\`✅ Consultation emails sent for \${email}\`);
+    } else {
+      console.log('⚠️ SMTP credentials not configured. Skipping emails.');
+    }
+    const bookingId = 'VC-' + Math.floor(Math.random()*10000);
+    res.json({ success: true, bookingId });
+  } catch (err) {
+    console.error('❌ Failed to send consultation email:', err.message);
+    res.status(500).json({ error: 'Failed to process request.' });
+  }
+});
 
 // ── start ──────────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production' || require.main === module) {

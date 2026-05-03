@@ -718,6 +718,218 @@
             margin-top: 3rem;
         }
 
+        /* ---------- KOMFORT FLOW ---------- */
+        .komfort {
+            background-color: var(--cream-deep);
+            padding: 7rem 3rem;
+        }
+
+        .komfort-wrap {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .komfort-left {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .komfort-left .eyebrow {
+            color: var(--sage-deep);
+        }
+
+        .komfort-left h2 {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            color: var(--forest);
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            margin-top: -1rem;
+        }
+
+        .komfort-sub {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: 1.6rem;
+            color: var(--ink-soft);
+            margin-bottom: 1rem;
+        }
+
+        .komfort-left p {
+            color: var(--ink-soft);
+            font-weight: 300;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        .komfort-divider {
+            border: none;
+            height: 1px;
+            background: rgba(45, 58, 42, 0.12);
+            margin: 1.5rem 0;
+        }
+
+        .komfort-protocol {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .komfort-protocol li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 400;
+            color: var(--ink);
+        }
+
+        .komfort-protocol .icon {
+            color: var(--sage-deep);
+            font-size: 1.1rem;
+        }
+
+        .komfort-right {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .k-card {
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .k-card-light {
+            background: var(--pearl);
+            border: 1px solid rgba(45, 58, 42, 0.1);
+            border-top: 3px solid var(--sage);
+        }
+
+        .k-card-dark {
+            background: var(--forest);
+            color: var(--cream);
+            border-top: 3px solid var(--terracotta);
+        }
+
+        .k-eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .k-card-light .k-eyebrow {
+            color: var(--sage-deep);
+        }
+
+        .k-eyebrow-dark {
+            color: var(--terracotta-soft);
+        }
+
+        .k-card-light h3 {
+            font-family: var(--display);
+            color: var(--forest);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .k-card-dark h3 {
+            font-family: var(--display);
+            color: var(--cream);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .k-card p {
+            font-weight: 300;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .k-card-light p {
+            color: var(--ink-soft);
+        }
+
+        .k-card-dark p {
+            color: rgba(244, 237, 225, 0.85);
+        }
+
+        .k-price {
+            font-family: var(--display);
+            color: var(--terracotta-soft);
+            font-size: 2.5rem;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+
+        .k-price-sub {
+            font-size: 0.75rem;
+            color: rgba(244, 237, 225, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .k-meta {
+            font-style: italic;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            font-family: var(--serif);
+        }
+
+        .k-card-light .k-meta {
+            color: var(--sage-deep);
+        }
+
+        .k-meta-dark {
+            color: rgba(244, 237, 225, 0.7);
+        }
+
+        .k-card .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .k-btn-sage {
+            background: var(--sage-deep) !important;
+            color: var(--cream) !important;
+            border-color: transparent !important;
+        }
+
+        .k-btn-sage:hover {
+            background: var(--forest) !important;
+            color: var(--cream) !important;
+        }
+
+        .k-btn-terracotta {
+            background: var(--terracotta) !important;
+            color: var(--cream) !important;
+            border-color: transparent !important;
+        }
+
+        .k-btn-terracotta:hover {
+            background: var(--terracotta-soft) !important;
+            color: var(--cream) !important;
+        }
+
+        .k-btn-icon {
+            width: 16px;
+            height: 16px;
+            stroke: var(--cream);
+        }
+
         /* ---------- ABOUT ---------- */
         .about {
             background: var(--forest);
@@ -1293,10 +1505,15 @@
             }
 
             .about-grid,
+            .komfort-wrap,
             .areas-wrap,
             .booking-wrap {
                 grid-template-columns: 1fr;
                 gap: 3rem;
+            }
+
+            .komfort {
+                padding: 5rem 1.5rem;
             }
 
             .testimonials-grid {
@@ -1343,7 +1560,8 @@
         </a>
         <ul class="nav-links">
             <li><a href="#how">How It Works</a></li>
-            <li><a href="#services">Services</a></li>
+            <li><a href="#services">Facials & Skin</a></li>
+            <li><a href="#komfort">Komfort Flow</a></li>
             <li><a href="#about">Meet Ruta</a></li>
             <li><a href="#areas">Service Area</a></li>
             <li><a href="#book" class="btn">Book Visit <span class="btn-arrow">→</span></a></li>
@@ -1667,6 +1885,61 @@
         </div>
     </section>
 
+    <!-- ============ KOMFORT FLOW ============ -->
+    <section class="komfort" id="komfort">
+        <div class="komfort-wrap">
+            <div class="komfort-left">
+                <div class="eyebrow">WHOLE-BODY WELLNESS</div>
+                <h2>The Komfort Flow System™</h2>
+                <div class="komfort-sub">A single session. A complete reset.</div>
+                <p>
+                    This is not a menu-based service. Each session follows the Komfort Flow System™ — a structured, multi-modality protocol designed to activate the central nervous system, restore microcirculation, and achieve a deep functional reset of the entire body.
+                </p>
+                <p>
+                    Advanced modalities are layered in precise sequence: mechanical stimulation, frequency-based relaxation, circulation-enhancing technology, and targeted deep-tissue activation. The session adapts in real time to your body's response.
+                </p>
+                <p>
+                    The goal is not temporary relief. It is a complete physiological reset — and results that last.
+                </p>
+                <hr class="komfort-divider">
+                <ul class="komfort-protocol">
+                    <li><span class="icon">✦</span> Central Nervous System Activation</li>
+                    <li><span class="icon">✦</span> Microcirculation & Lymphatic Flow</li>
+                    <li><span class="icon">✦</span> Deep Tissue Recovery & Muscle Release</li>
+                    <li><span class="icon">✦</span> Full-Body Functional Reset</li>
+                </ul>
+            </div>
+            <div class="komfort-right">
+                <!-- Card 1 -->
+                <div class="k-card k-card-light">
+                    <div class="k-eyebrow">FREE TO START</div>
+                    <h3>Video Consultation</h3>
+                    <p>Not sure which session is right for you? Book a free 30-minute video call with Ruta. She'll assess your needs, explain the protocol, and answer any questions — before you commit to anything.</p>
+                    <div class="k-meta">30 min · Zoom or Google Meet · No deposit required</div>
+                    <a href="book.html?service=video-consultation" class="btn k-btn-sage">
+                        <svg class="k-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Book a Free Call →
+                    </a>
+                </div>
+                <!-- Card 2 -->
+                <div class="k-card k-card-dark">
+                    <div class="k-eyebrow k-eyebrow-dark">SIGNATURE SESSION</div>
+                    <h3>Komfort Flow Reset</h3>
+                    <p>The full integrated protocol, delivered privately in your home. One session, all modalities, in precise sequence. Adapted in real time to your body. $200 per session.</p>
+                    <div class="k-price">$200</div>
+                    <div class="k-price-sub">per session · $25 deposit to book</div>
+                    <div class="k-meta k-meta-dark">75–90 min · all modalities included · in-home</div>
+                    <a href="book.html?service=komfort-flow" class="btn k-btn-terracotta">Book a Home Visit →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ============ ABOUT ============ -->
     <section class="about" id="about">
         <div class="about-grid">
@@ -1894,7 +2167,8 @@
             </div>
             <div class="footer-col">
                 <h4>Explore</h4>
-                <a href="#services">Services</a>
+                <a href="#services">Facials & Skin</a>
+                <a href="#komfort">Komfort Flow</a>
                 <a href="#about">About Ruta</a>
                 <a href="#book">Book a Visit</a>
                 <a href="#">Gift Cards</a>
@@ -1954,7 +2228,8 @@
     <!-- mobile nav overlay -->
     <div class="mobile-nav" id="mobile-nav">
       <a href="#how" onclick="closeMobileNav()">How It Works</a>
-      <a href="#services" onclick="closeMobileNav()">Services</a>
+      <a href="#services" onclick="closeMobileNav()">Facials & Skin</a>
+      <a href="#komfort" onclick="closeMobileNav()">Komfort Flow</a>
       <a href="#about" onclick="closeMobileNav()">Meet Ruta</a>
       <a href="#areas" onclick="closeMobileNav()">Service Area</a>
       <a href="#book" class="btn" onclick="closeMobileNav()">Book Visit →</a>
