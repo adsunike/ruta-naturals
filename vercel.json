@@ -28,6 +28,10 @@
       "dest": "/server.js"
     },
     {
+      "src": "/session-details",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }

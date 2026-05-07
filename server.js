@@ -121,7 +121,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         <p>Your video consultation with Ruta is confirmed and your $25 payment has been received.</p>
         <div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;border:1px solid rgba(45,58,42,0.1);">
           <h3 style="margin-top:0;font-size:16px;">Booking Summary</h3>
-          <p><strong>Service:</strong> Video Consultation (40 min)</p>
+          <p><strong>Service:</strong> Video Consultation (10 min)</p>
           <p><strong>Preferred Time:</strong> ${meta.date}</p>
           <p><strong>Amount Paid:</strong> $25.00 (full payment)</p>
         </div>
@@ -319,6 +319,22 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
+
+// ── session details (used by success.html to personalise the confirmation) ─
+app.get('/session-details', async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.status(400).json({ error: 'Missing session id' });
+  try {
+    const session = await stripe.checkout.sessions.retrieve(id);
+    res.json({
+      email:  session.customer_email,
+      meta:   session.metadata,
+      amount: session.amount_total,
+    });
+  } catch (err) {
+    res.status(404).json({ error: 'Session not found' });
+  }
+});
 
 // ── start ──────────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production' || require.main === module) {
