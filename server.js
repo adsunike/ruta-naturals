@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path    = require('path');
+const fs      = require('fs');
 const stripe  = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const nodemailer = require('nodemailer');
@@ -18,6 +19,50 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASS,
   },
 });
+
+// ── Booking Store (JSON file — swap to Vercel KV / DB for production) ──────
+const BOOKINGS_PATH = path.join(__dirname, 'bookings.json');
+let bookingsCache = null;
+
+function loadBookings() {
+  if (bookingsCache) return bookingsCache;
+  try {
+    if (fs.existsSync(BOOKINGS_PATH)) {
+      bookingsCache = JSON.parse(fs.readFileSync(BOOKINGS_PATH, 'utf-8'));
+    } else {
+      bookingsCache = [];
+    }
+  } catch (e) {
+    console.error('Failed to load bookings:', e.message);
+    bookingsCache = [];
+  }
+  return bookingsCache;
+}
+
+function saveBookings() {
+  try {
+    fs.writeFileSync(BOOKINGS_PATH, JSON.stringify(bookingsCache, null, 2));
+  } catch (e) {
+    console.error('Failed to save bookings:', e.message);
+  }
+}
+
+function addBooking(data) {
+  loadBookings();
+  if (bookingsCache.find(b => b.id === data.id)) return false;
+  bookingsCache.push(data);
+  saveBookings();
+  return true;
+}
+
+function updateBooking(id, updates) {
+  loadBookings();
+  const idx = bookingsCache.findIndex(b => b.id === id);
+  if (idx === -1) return null;
+  bookingsCache[idx] = { ...bookingsCache[idx], ...updates };
+  saveBookings();
+  return bookingsCache[idx];
+}
 
 // ── Stripe webhook (MUST be before express.json) ───────────────────────────
 // Set STRIPE_WEBHOOK_SECRET in .env and point the Stripe dashboard to /webhook
@@ -123,6 +168,33 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     } catch (emailErr) {
       console.error('❌ Email error:', emailErr.message);
     }
+
+    // ── persist booking to local store ──
+    const existing = loadBookings();
+    const count = existing.length;
+    const bookingData = {
+      id: session.id,
+      bookingId: 'RN-' + String(count + 1).padStart(4, '0'),
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      treatment: meta.treatment,
+      firstName: meta.firstName,
+      lastName: meta.lastName,
+      email: session.customer_email,
+      phone: meta.phone,
+      address: meta.address || 'N/A',
+      date: meta.date,
+      travelFee: Number(meta.travelFee || 0),
+      guests: Number(meta.guests || 1),
+      groupDiscount: meta.groupDiscount || '0',
+      notes: meta.notes || '',
+      paymentStatus: 'paid',
+      amount: 2500,
+      confirmedAt: null,
+      cancelledAt: null,
+    };
+    addBooking(bookingData);
+    console.log('📦 Booking stored:', bookingData.bookingId);
   }
 
   res.sendStatus(200);
@@ -132,6 +204,57 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // ── middleware ─────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));   // serve index.html, success.html, etc.
+
+// ── Admin auth middleware ──────────────────────────────────────────────────
+function requireAdmin(req, res, next) {
+  const pw = process.env.ADMIN_PASSWORD;
+  if (!pw) return res.status(500).json({ error: 'ADMIN_PASSWORD not configured in .env' });
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ') || auth.slice(7) !== pw) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
+// ── Admin API routes ──────────────────────────────────────────────────────
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+app.get('/api/admin/bookings', requireAdmin, (req, res) => {
+  const all = loadBookings();
+  // Sort most recent first
+  all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const statusFilter = req.query.status;
+  const search = req.query.search?.toLowerCase();
+  let filtered = all;
+  if (statusFilter && ['pending', 'confirmed', 'cancelled'].includes(statusFilter)) {
+    filtered = filtered.filter(b => b.status === statusFilter);
+  }
+  if (search) {
+    filtered = filtered.filter(b =>
+      b.bookingId.toLowerCase().includes(search) ||
+      b.firstName.toLowerCase().includes(search) ||
+      b.lastName.toLowerCase().includes(search) ||
+      b.email.toLowerCase().includes(search)
+    );
+  }
+  res.json({ bookings: filtered, total: all.length });
+});
+
+app.patch('/api/admin/bookings/:id', requireAdmin, (req, res) => {
+  const { status } = req.body;
+  if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status. Use: pending, confirmed, cancelled' });
+  }
+  const updates = { status };
+  if (status === 'confirmed') updates.confirmedAt = new Date().toISOString();
+  if (status === 'cancelled') updates.cancelledAt = new Date().toISOString();
+  const booking = updateBooking(req.params.id, updates);
+  if (!booking) return res.status(404).json({ error: 'Booking not found' });
+  res.json({ booking });
+});
 
 // ── create Stripe Checkout Session ─────────────────────────────────────────
 app.post('/create-checkout-session', async (req, res) => {
