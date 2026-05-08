@@ -25,6 +25,8 @@ This file tracks all tasks, decisions, and changes made to this project.
 | 14 | KV storage error hardening | Done | 2026-05-08 | Added try/catch around all KV operations in server.js |
 | 15 | Social media links | Done | 2026-05-08 | Updated from `#` placeholders to real URLs |
 | 16 | Send production deploy | Pending | — | Push main to trigger Vercel deploy |
+| 17 | Cal.com integration | Done | 2026-05-08 | Slots proxy, booking creation, calendar replaced. See changelog |
+| 18 | Referral system | Done | 2026-05-08 | Coupon-based, no accounts needed. Referral links, auto-emails, configurable amounts |
 
 ---
 
@@ -35,6 +37,8 @@ This file tracks all tasks, decisions, and changes made to this project.
 | 2026-05-08 | Use logo.png as favicon | No dedicated favicon file exists; logo.png provides consistent branding |
 | 2026-05-08 | Add GA4 + Sentry before launch | Need monitoring in place from day one to catch issues |
 | 2026-05-08 | Keep mocked calendar for MVP | Full Cal.com/Google Calendar integration is post-launch work |
+| 2026-05-08 | Integrated Cal.com v2 REST API | Replace mocked calendar with real Cal.com availability slots. Server-side proxy keeps API key secure. Booking created after Stripe payment confirmed (not before) |
+| 2026-05-08 | Referral system: no user accounts needed | Email is the identity. Referral links on success page. Coupon codes auto-emailed when referred friend pays. Amounts configurable via env vars. |
 
 ---
 
@@ -57,6 +61,8 @@ This file tracks all tasks, decisions, and changes made to this project.
 | `UPSTASH_REDIS_REST_TOKEN` | Yes* | Upstash Redis REST token |
 | `NODE_ENV` | No | Set to `production` on Vercel |
 | `SENTRY_DSN` | No | Sentry DSN for error monitoring |
+| `REFERRAL_CREDIT_AMOUNT` | No | Referral coupon amount in cents (default: 2500 = $25) |
+| `REFERRAL_WELCOME_AMOUNT` | No | Welcome coupon amount in cents (default: 1000 = $10) |
 
 *Required for full functionality. App degrades gracefully without SMTP/Redis.
 
@@ -101,5 +107,45 @@ This file tracks all tasks, decisions, and changes made to this project.
 - Consolidated all worktree branches into main
 - Created PROJECT_LOG.md for ongoing task tracking
 - Updated CLAUDE.md with production environment reference
-- Created PROJECT_LOG.md for ongoing task tracking
-- Updated CLAUDE.md with production environment reference
+
+### 2026-05-08 — Cal.com integration
+- Added GET /api/slots proxy endpoint in server.js (proxies Cal.com v2 /slots API)
+- Added Cal.com booking creation in Stripe webhook handler (creates event after payment)
+- Replaced mocked calendar in book.html with real Cal.com slot data
+- Added `calStart` ISO timestamp to booking data flow (frontend → Stripe metadata → webhook → Cal.com)
+- Added Cal.com env vars to .env.example (CALCOM_API_KEY, CALCOM_EVENT_TYPE_VIDEO, CALCOM_EVENT_TYPE_INHOME)
+- Calendar falls back gracefully to standard time slots when Cal.com not configured
+- Sundays always shown as unavailable (business closed)
+- Time slots from Cal.com shown in 12-hour format matching the existing UX
+
+### 2026-05-08 — Cal.com enhancements: video, hours, Google Meet
+- Video consultation now goes through the calendar step (selects date/time via Cal.com, not a dropdown)
+- Added 5-hour advance booking rule: same-day slots must be at least 5 hours from now
+- Added operating hours enforcement: 9am start minimum, 9pm end maximum (with duration buffer)
+- All time slot filtering uses America/New_York timezone (toLocaleString)
+- Cal.com booking response captured: meeting URL stored in booking record
+- Admin confirmation triggers auto-email with Google Meet link (for video consultations)
+- Updated email templates: initial email says "link sent on confirmation", admin email updated
+- Fixed product description (40-min → 10-min for video consultation)
+- Backend /api/slots accepts eventTypeKeyword (video/inhome) mapped to numeric IDs from env vars
+
+### 2026-05-08 — Referral system (coupon-based, no accounts needed)
+- Added referral coupon storage (JSON file / Redis) with getAllCoupons, saveCoupon, getBookingByRefCode
+- Each booking gets a referral code = its bookingId (e.g., "RN-0001")
+- Referral link format: https://rutanaturals.com/book.html?ref=RN-0001
+- book.html detects ?ref= param and passes referredBy to Stripe metadata
+- Webhook detects referred bookings → issues coupons to both referrer and new user
+- Coupon emails auto-sent: referrer gets reward code, new user gets welcome code
+- success.html shows referral link to share + any earned coupons
+- Coupon amounts configurable via REFERRAL_CREDIT_AMOUNT and REFERRAL_WELCOME_AMOUNT env vars (in cents)
+- No user accounts needed — email is the identity
+- coupons.json added to .gitignore
+
+### 2026-05-08 — Refer & Earn page + credit lookup + manual referral code
+- Created `/refer` page: full Refer & Earn marketing page with step flow, visual diagram, rewards explanation, FAQ, and built-in credit lookup tool
+- Added `GET /api/referral-lookup?email=` endpoint — returns all coupons for an email with totals
+- Added manual referral code text field in booking step 3 (overrides URL param if typed)
+- Pre-fills referral field from URL `?ref=` param automatically
+- Linked Refer & Earn in index.html nav (desktop + mobile) and footer
+- Linked Refer & Earn on success.html as secondary button
+- Updated Claude memory and PROJECT_LOG.md

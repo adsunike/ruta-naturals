@@ -126,6 +126,42 @@ async function getNextBookingNumber() {
   return all.length + 1;
 }
 
+// ── Referral Coupon Storage ──────────────────────────────────────────────
+const COUPONS_PATH = path.join(__dirname, 'coupons.json');
+
+async function getAllCoupons() {
+  if (USE_KV) {
+    const codes = await kv.lrange('coupon_codes', 0, -1);
+    if (!codes || codes.length === 0) return {};
+    const entries = await Promise.all(codes.map(code => kv.get(`coupon:${code}`)));
+    const map = {};
+    entries.forEach((entry, i) => { if (entry) map[codes[i]] = entry; });
+    return map;
+  }
+  try {
+    if (!fs.existsSync(COUPONS_PATH)) return {};
+    const data = await fs.promises.readFile(COUPONS_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch { return {}; }
+}
+
+async function saveCoupon(code, data) {
+  if (USE_KV) {
+    await kv.set(`coupon:${code}`, data);
+    await kv.lpush('coupon_codes', code);
+    return;
+  }
+  const all = await getAllCoupons();
+  all[code] = data;
+  await fs.promises.writeFile(COUPONS_PATH, JSON.stringify(all, null, 2));
+}
+
+async function getBookingByRefCode(refCode) {
+  // refCode is a bookingId like "RN-0001"
+  const all = await getAllBookings();
+  return all.find(b => b.bookingId === refCode) || null;
+}
+
 // ── Admin Auth ─────────────────────────────────────────────────────────────
 // In-memory rate limiter: max 5 failed attempts per 15 min per IP
 const loginAttempts = new Map();
@@ -203,7 +239,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       <p><strong>Notes:</strong> ${meta.notes || 'None'}</p>
       <hr/>
       <p>Paid: <strong>$25.00</strong> (full payment for video consultation)</p>
-      <p style="color:#b8674a;"><em>Please send the client a Zoom or Google Meet link at their email address above.</em></p>
+      <p style="color:#b8674a;"><em>The Google Meet link will be auto-sent to the client when you confirm this booking in the admin dashboard.</em></p>
     ` : `
       <h2 style="color:#2d3a2a;">New Komfort Flow Home Visit Booking</h2>
       <p><strong>Client:</strong> ${meta.firstName} ${meta.lastName}</p>
@@ -227,10 +263,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         <div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;border:1px solid rgba(45,58,42,0.1);">
           <h3 style="margin-top:0;font-size:16px;">Booking Summary</h3>
           <p><strong>Service:</strong> Video Consultation (10 min)</p>
-          <p><strong>Preferred Time:</strong> ${meta.date}</p>
+          <p><strong>Scheduled:</strong> ${meta.date}</p>
           <p><strong>Amount Paid:</strong> $25.00 (full payment)</p>
         </div>
-        <p>Ruta will send your Zoom or Google Meet link to this email within a few hours.</p>
+        <p>Ruta will review your booking shortly. Once confirmed, your <strong>Google Meet link</strong> will be automatically sent to this email.</p>
         <p>Warmly,<br/><strong>Ruta Naturals</strong></p>
       </div>
     ` : `
@@ -298,6 +334,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       guests: Number(meta.guests || 1),
       groupDiscount: meta.groupDiscount || '0',
       notes: meta.notes || '',
+      referredBy: meta.referredBy || '',
       paymentStatus: 'paid',
       amount: 2500,
       confirmedAt: null,
@@ -306,6 +343,124 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     const added = await addBooking(bookingData);
     if (added) {
       console.log('📦 Booking stored:', bookingData.bookingId);
+      // ── Create Cal.com booking (if configured) ──────────────────────────
+      if (process.env.CALCOM_API_KEY) {
+        try {
+          const calEventTypeId = isVideo
+            ? Number(process.env.CALCOM_EVENT_TYPE_VIDEO)
+            : Number(process.env.CALCOM_EVENT_TYPE_INHOME);
+          if (calEventTypeId && meta.calStart) {
+            const attendeeName = meta.firstName + ' ' + meta.lastName;
+            const calRes = await fetch('https://api.cal.com/v2/bookings', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + process.env.CALCOM_API_KEY,
+                'cal-api-version': '2024-08-13',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                eventTypeId: calEventTypeId,
+                start: meta.calStart,
+                attendee: {
+                  name: attendeeName,
+                  email: session.customer_email,
+                  timeZone: 'America/New_York',
+                  language: 'en',
+                },
+                metadata: {
+                  stripeSessionId: session.id,
+                  bookingId: bookingData.bookingId,
+                },
+              }),
+            });
+            if (calRes.ok) {
+              const calData = await calRes.json();
+              const calBooking = calData && calData.data ? calData.data : null;
+              const calUpdate = {};
+              if (calBooking) {
+                if (calBooking.uid) calUpdate.calBookingUid = calBooking.uid;
+                if (calBooking.locationUrl) calUpdate.calMeetingUrl = calBooking.locationUrl;
+              }
+              if (Object.keys(calUpdate).length > 0) {
+                await updateBooking(session.id, calUpdate);
+              }
+              console.log('📅 Cal.com booking created for', bookingData.bookingId);
+            } else {
+              const calErrText = await calRes.text();
+              console.error('❌ Cal.com error:', calErrText);
+            }
+          }
+        } catch (calErr) {
+          console.error('❌ Cal.com booking error:', calErr.message);
+        }
+      }
+
+      // ── Referral: issue coupons if this booking was referred ────────────
+      if (meta.referredBy && bookingData.email) {
+        try {
+          const referrerBooking = await getBookingByRefCode(meta.referredBy);
+          if (referrerBooking && referrerBooking.email) {
+            const refAmt = Number(process.env.REFERRAL_CREDIT_AMOUNT || 2500);
+            const welcomeAmt = Number(process.env.REFERRAL_WELCOME_AMOUNT || 1000);
+            const refCode = 'SAVE' + (refAmt / 100) + '-' + bookingData.bookingId;
+            const welcomeCode = 'WELCOME-' + bookingData.bookingId;
+
+            await saveCoupon(refCode, {
+              email: referrerBooking.email,
+              amountCents: refAmt,
+              type: 'referrer',
+              used: false,
+              issuedAt: new Date().toISOString(),
+              referredBooking: bookingData.bookingId,
+            });
+            await saveCoupon(welcomeCode, {
+              email: bookingData.email,
+              amountCents: welcomeAmt,
+              type: 'welcome',
+              used: false,
+              issuedAt: new Date().toISOString(),
+            });
+            console.log('🎟️  Referral coupons issued:', refCode, welcomeCode);
+
+            // Send coupon emails
+            if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+              const baseUrl = process.env.BASE_URL || 'http://localhost:' + PORT;
+              const fmt = function(cents) { return (cents / 100).toFixed(0); };
+              await transporter.sendMail({
+                from: '"Ruta Naturals" <' + process.env.SMTP_USER + '>',
+                to: referrerBooking.email,
+                subject: 'You earned a reward! Your referral booked with Ruta',
+                html: '<div style="font-family:Georgia,serif;color:#2d3a2a;max-width:600px;line-height:1.7;">' +
+                  '<h2 style="font-weight:400;color:#b8674a;">Thank you for your referral!</h2>' +
+                  '<p>' + bookingData.firstName + ' ' + bookingData.lastName + ' has booked a session using your link.</p>' +
+                  '<div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;text-align:center;border:1px solid rgba(45,58,42,0.1);">' +
+                  '<p style="margin-bottom:0.3rem;font-size:0.85rem;color:#4a463d;">Your coupon code for next booking:</p>' +
+                  '<p style="font-family:monospace;font-size:1.6rem;color:#2d3a2a;letter-spacing:0.1em;">' + refCode + '</p>' +
+                  '<p style="margin-top:0.3rem;font-size:0.85rem;color:#b8674a;">$' + fmt(refAmt) + ' off your next session</p></div>' +
+                  '<p style="font-size:0.85rem;">Use code at <a href="' + baseUrl + '/book.html" style="color:#b8674a;">' + baseUrl + '/book.html</a></p>' +
+                  '<p>Warmly,<br/><strong>Ruta Naturals</strong></p></div>',
+              });
+              await transporter.sendMail({
+                from: '"Ruta Naturals" <' + process.env.SMTP_USER + '>',
+                to: bookingData.email,
+                subject: 'Welcome — here\'s a gift for your next visit!',
+                html: '<div style="font-family:Georgia,serif;color:#2d3a2a;max-width:600px;line-height:1.7;">' +
+                  '<h2 style="font-weight:400;color:#b8674a;">Welcome, ' + bookingData.firstName + '!</h2>' +
+                  '<p>Thank you for booking with Ruta. Here\'s a welcome discount for your next session:</p>' +
+                  '<div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;text-align:center;border:1px solid rgba(45,58,42,0.1);">' +
+                  '<p style="margin-bottom:0.3rem;font-size:0.85rem;color:#4a463d;">Your welcome coupon code:</p>' +
+                  '<p style="font-family:monospace;font-size:1.6rem;color:#2d3a2a;letter-spacing:0.1em;">' + welcomeCode + '</p>' +
+                  '<p style="margin-top:0.3rem;font-size:0.85rem;color:#b8674a;">$' + fmt(welcomeAmt) + ' off your next session</p></div>' +
+                  '<p style="font-size:0.85rem;">Use code at <a href="' + baseUrl + '/book.html" style="color:#b8674a;">' + baseUrl + '/book.html</a></p>' +
+                  '<p>Warmly,<br/><strong>Ruta Naturals</strong></p></div>',
+              });
+              console.log('📧 Referral coupon emails sent');
+            }
+          }
+        } catch (refErr) {
+          console.error('❌ Referral processing error:', refErr.message);
+        }
+      }
     } else {
       console.log('⚠️  Duplicate webhook ignored for session:', session.id);
     }
@@ -354,6 +509,32 @@ app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
   if (status === 'cancelled')  updates.cancelledAt = new Date().toISOString();
   const booking = await updateBooking(req.params.id, updates);
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+  // ── Auto-send Google Meet link when confirming a video consultation ──
+  if (status === 'confirmed' && booking.treatment && booking.treatment.includes('video-consultation') && booking.calMeetingUrl && process.env.SMTP_USER) {
+    try {
+      const clientName = (booking.firstName || '') + ' ' + (booking.lastName || '');
+      await transporter.sendMail({
+        from: '"Ruta Naturals" <' + process.env.SMTP_USER + '>',
+        to: booking.email,
+        subject: 'Your video consultation with Ruta — confirmed with meeting link',
+        html: '<div style="font-family:Georgia,serif;color:#2d3a2a;max-width:600px;margin:0 auto;line-height:1.7;">' +
+          '<h2 style="font-weight:400;color:#b8674a;">Hello ' + (booking.firstName || '') + ',</h2>' +
+          '<p>Your video consultation has been confirmed! Here\'s your private meeting link:</p>' +
+          '<div style="background:#fbf7ee;padding:20px;border-radius:8px;margin:20px 0;border:1px solid rgba(45,58,42,0.1);text-align:center;">' +
+          '<p style="margin-bottom:0.5rem;"><strong>Join your session:</strong></p>' +
+          '<a href="' + booking.calMeetingUrl + '" style="display:inline-block;padding:0.9rem 2rem;background:#2d3a2a;color:#f4ede1;text-decoration:none;border-radius:999px;font-size:0.85rem;letter-spacing:0.1em;">Open Google Meet →</a>' +
+          '</div>' +
+          '<p style="color:#4a463d;font-size:0.9rem;">Please join a few minutes early. The link is also in your Cal.com calendar invitation.</p>' +
+          '<p>Warmly,<br/><strong>Ruta Naturals</strong></p>' +
+          '</div>',
+      });
+      console.log('✅ Meeting link sent for', booking.bookingId);
+    } catch (emailErr) {
+      console.error('❌ Meeting link email error:', emailErr.message);
+    }
+  }
+
   res.json({ booking });
 });
 
@@ -361,7 +542,7 @@ app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
 app.post('/create-checkout-session', async (req, res) => {
   const {
     firstName, lastName, email, phone,
-    address, treatment, date, notes, travelFee, guests, groupDiscount,
+    address, treatment, date, notes, travelFee, guests, groupDiscount, referredBy,
   } = req.body;
 
   if (!email || !treatment || !date) {
@@ -376,7 +557,7 @@ app.post('/create-checkout-session', async (req, res) => {
     ? 'Ruta Naturals — Video Consultation'
     : 'Ruta Naturals — Komfort Flow Reset (Deposit)';
   const productDesc = isVideo
-    ? `40-min video call · ${date} · ${firstName} ${lastName}`
+    ? `10-min video consultation · ${date} · ${firstName} ${lastName}`
     : `Home visit (~60 min) · ${date} · ${firstName} ${lastName}${fee > 0 ? ' · $15 travel fee at visit' : ''}`;
 
   try {
@@ -400,6 +581,8 @@ app.post('/create-checkout-session', async (req, res) => {
         travelFee: String(fee),
         guests: String(guests || 1),
         groupDiscount: String(groupDiscount || '0'),
+        calStart: req.body.calStart || '',
+        referredBy: referredBy || '',
       },
       success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${baseUrl}/book.html`,
@@ -418,13 +601,99 @@ app.get('/session-details', async (req, res) => {
   if (!id) return res.status(400).json({ error: 'Missing session id' });
   try {
     const session = await stripe.checkout.sessions.retrieve(id);
+    // Look up the booking to find referral code and coupons
+    const allBookings = await getAllBookings();
+    const booking = allBookings.find(b => b.id === id) || null;
+    const allCoupons = await getAllCoupons();
+
+    // Find coupons issued for this booking's email
+    const email = session.customer_email || '';
+    const myCoupons = {};
+    for (const code of Object.keys(allCoupons)) {
+      if (allCoupons[code].email === email) myCoupons[code] = allCoupons[code];
+    }
+
+    // Find the referral code (bookingId) for this booking
+    const referralCode = booking ? booking.bookingId : null;
+
+    // Determine if this booking was referred
+    const referredBy = booking ? (booking.referredBy || null) : null;
+
     res.json({
-      email:  session.customer_email,
-      meta:   session.metadata,
-      amount: session.amount_total,
+      email:       email,
+      meta:        session.metadata,
+      amount:      session.amount_total,
+      referralCode: referralCode,
+      referredBy:  referredBy,
+      coupons:     myCoupons,
     });
   } catch (err) {
     res.status(404).json({ error: 'Session not found' });
+  }
+});
+
+// ── Referral Credit Lookup ────────────────────────────────────────────────
+app.get('/api/referral-lookup', async (req, res) => {
+  const email = (req.query.email || '').trim().toLowerCase();
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+  try {
+    const allCoupons = await getAllCoupons();
+    const myCoupons = [];
+    let totalEarned = 0;
+    let totalUsed = 0;
+    for (const code of Object.keys(allCoupons)) {
+      const c = allCoupons[code];
+      if (c.email && c.email.toLowerCase() === email) {
+        myCoupons.push({ code: code, ...c });
+        totalEarned += c.amountCents || 0;
+        if (c.used) totalUsed += c.amountCents || 0;
+      }
+    }
+    res.json({
+      email: email,
+      coupons: myCoupons,
+      totalEarnedCents: totalEarned,
+      totalUsedCents: totalUsed,
+      totalAvailableCents: totalEarned - totalUsed,
+    });
+  } catch (err) {
+    console.error('❌ Referral lookup error:', err.message);
+    res.status(500).json({ error: 'Lookup failed' });
+  }
+});
+
+// ── Referral info page ────────────────────────────────────────────────────
+app.get('/refer', (req, res) => {
+  res.sendFile(path.join(__dirname, 'refer.html'));
+});
+
+// ── Cal.com Availability Proxy ───────────────────────────────────────────
+app.get('/api/slots', async (req, res) => {
+  let { eventTypeId, eventTypeKeyword, start, end } = req.query;
+  // Map keyword to numeric ID from env vars
+  if (!eventTypeId && eventTypeKeyword) {
+    if (eventTypeKeyword === 'video') eventTypeId = process.env.CALCOM_EVENT_TYPE_VIDEO;
+    else if (eventTypeKeyword === 'inhome') eventTypeId = process.env.CALCOM_EVENT_TYPE_INHOME;
+  }
+  if (!eventTypeId || !start || !end) {
+    return res.status(400).json({ error: 'Missing required params: eventTypeId or eventTypeKeyword, start, end' });
+  }
+  const apiKey = process.env.CALCOM_API_KEY;
+  if (!apiKey) return res.json({ slots: {} });
+
+  try {
+    const url = `https://api.cal.com/v2/slots?eventTypeId=${eventTypeId}&start=${start}&end=${end}&timeZone=America%2FNew_York&format=range`;
+    const resp = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'cal-api-version': '2024-08-13',
+      },
+    });
+    const data = await resp.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Cal.com slots error:', err.message);
+    res.json({ slots: {} });
   }
 });
 

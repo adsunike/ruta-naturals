@@ -886,6 +886,11 @@
           <label>Notes for Ruta (optional)</label>
           <textarea id="f-notes" placeholder="Any allergies, skin concerns, parking notes, etc."></textarea>
         </div>
+        <div class="form-group" style="margin-top: 0.8rem; padding-bottom: 0;">
+          <label style="font-size:0.78rem;">Referral code <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
+          <input type="text" id="f-ref-code" placeholder="e.g. RN-0001" maxlength="20" style="font-size:0.85rem;" />
+          <div style="font-size:0.72rem;color:var(--sage-deep);margin-top:0.25rem;">Enter a friend's code to get a welcome discount.</div>
+        </div>
       </div>
       <div class="step-actions">
         <button class="btn btn-ghost" data-back="2">← Back</button>
@@ -1000,6 +1005,8 @@
     treatment: null,    // {name, price, duration}
     date: null,         // Date object
     time: null,         // string like "10:00 AM"
+    calStart: null,     // ISO string for Cal.com API
+    referredBy: null,   // referral code from ?ref= URL param
     travelFee: 0,       // $0 for North Port, $15 for surrounding areas
     guests: 1,          // number of people — 2+ triggers 20% group discount
     details: {}
@@ -1049,14 +1056,13 @@
       document.getElementById('next-1').disabled = false;
     });
   });
-  document.getElementById('next-1').addEventListener('click', () => {
+  document.getElementById('next-1').addEventListener('click', async () => {
     const isVideo = state.treatment.name === 'video-consultation';
     if (isVideo) {
-      // Video consultation: skip calendar, go straight to details
+      // Video consultation: now goes through calendar step too (with Cal.com)
       document.querySelector('[data-step="3"] .step-header p').textContent = 'How to reach you. Used only for your consultation.';
       document.getElementById('address-fields').style.display = 'none';
-      document.getElementById('call-time-group').style.display = 'block';
-      // Video consultation is $25 full payment via Stripe
+      document.getElementById('call-time-group').style.display = 'none';
       document.getElementById('deposit-text').textContent = 'A $25 payment secures your video consultation. This is the full cost — no additional balance.';
       document.getElementById('pay-btn').textContent = 'Pay $25 & Book Call →';
       document.getElementById('sum-address').style.display = 'none';
@@ -1066,11 +1072,20 @@
       document.getElementById('due-note').textContent = 'Full payment for Video Consultation. Secured via Stripe.';
       document.getElementById('area-ok').style.display = 'none';
       document.getElementById('area-warn').style.display = 'none';
-      goToStep(3);
+      // Step 2 heading for video
+      document.querySelector('[data-step="2"] .step-header p').textContent = 'Pick a time for your video call with Ruta. Available slots shown in green.';
+      await fetchCalSlots();
+      renderCalendar();
+      goToStep(2);
     } else {
       document.querySelector('[data-step="3"] .step-header p').textContent = 'Where Ruta should arrive and how to reach you. Used only for your booking.';
+      document.querySelector('[data-step="2"] .step-header p').textContent = 'Available slots show in green. Ruta works Monday through Saturday, 9am to 7pm.';
       document.getElementById('address-fields').style.display = 'block';
       document.getElementById('call-time-group').style.display = 'none';
+      document.getElementById('area-ok').style.display = '';
+      document.getElementById('area-warn').style.display = '';
+      document.getElementById('area-ok').classList.remove('show');
+      document.getElementById('area-warn').classList.remove('show');
       document.getElementById('deposit-text').textContent = "A $25 deposit secures your appointment. It's applied directly toward your $200 treatment total — the rest ($175) is paid in person.";
       document.getElementById('pay-btn').textContent = 'Pay $25 Deposit & Reserve →';
       document.getElementById('sum-address').style.display = 'flex';
@@ -1078,6 +1093,7 @@
       document.getElementById('due-label').textContent = 'Due now (deposit)';
       document.getElementById('due-amount').textContent = '$25.00';
       document.getElementById('due-note').textContent = 'Deposit applied to your $200 total. Balance of $175 paid in person at your visit.';
+      await fetchCalSlots();
       renderCalendar();
       goToStep(2);
     }
@@ -1092,21 +1108,24 @@
         card.click();
       }
     }
+    // Detect referral code from URL
+    const refParam = urlParams.get('ref');
+    if (refParam) {
+      state.referredBy = refParam;
+      const refInput = document.getElementById('f-ref-code');
+      if (refInput) refInput.value = refParam;
+    }
   });
 
   // ============ STEP 2: CALENDAR ============
   let viewMonth = new Date();
   viewMonth.setDate(1);
 
-  // Mocked unavailable dates: random "fully booked" days
-  // In real app, these come from Cal.com / Google Calendar API
+  // Cal.com slots cache — fetched from our backend proxy
+  let calSlotsCache = {};
+  let calLoading = false;
+
   const todayStr = new Date().toDateString();
-  function isFullyBooked(d) {
-    // mock: every 5th day fully booked, plus all Sundays
-    if (d.getDay() === 0) return true;
-    if (d.getDate() % 7 === 3) return true;
-    return false;
-  }
   function isPast(d) {
     const t = new Date(); t.setHours(0,0,0,0);
     return d < t;
@@ -1114,6 +1133,86 @@
 
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const dowNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  // ── Get the event type ID for the selected treatment ──
+  function getEventTypeId() {
+    if (state.treatment && state.treatment.name === 'video-consultation') return 'video';
+    return 'inhome';
+  }
+
+  // ── Get duration in minutes for the selected treatment ──
+  function getDurationMinutes() {
+    if (state.treatment && state.treatment.name === 'video-consultation') return 10;
+    return 60;
+  }
+
+  // ── Get Eastern Time hour from an ISO string ──
+  function getETHour(isoStr) {
+    return parseInt(new Date(isoStr).toLocaleString('en-US', { timeZone: 'America/New_York', hour: 'numeric', hour12: false }));
+  }
+
+  // ── Get Florida date string for "is today" comparison ──
+  function getFLDateStr(date) {
+    return date.toLocaleDateString('en-US', { timeZone: 'America/New_York' });
+  }
+
+  // ── Check if a slot obeys operating hours and the 5-hour advance rule ──
+  function isSlotBookable(isoStr) {
+    const slotStart = new Date(isoStr);
+    const now = new Date();
+    const durationMin = getDurationMinutes();
+    const slotEnd = new Date(slotStart.getTime() + durationMin * 60000);
+
+    // Operating hours: 9am start min, 9pm end max (Florida time)
+    const startHour = getETHour(isoStr);
+    const endHour = getETHour(slotEnd.toISOString());
+    const endMin = parseInt(new Date(slotEnd.toISOString())
+      .toLocaleString('en-US', { timeZone: 'America/New_York', minute: '2-digit' }));
+    if (startHour < 9) return false;
+    if (endHour > 21 || (endHour === 21 && endMin > 0)) return false;
+
+    // 5-hour advance rule for same-day bookings (Florida timezone)
+    const isTodayFL = getFLDateStr(slotStart) === getFLDateStr(now);
+    if (isTodayFL) {
+      const minStart = new Date(now.getTime() + 5 * 3600000);
+      if (slotStart < minStart) return false;
+    }
+
+    return true;
+  }
+
+  // ── Check if a date has any bookable slots ──
+  function hasAvailableSlots(date) {
+    const key = date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
+    const daySlots = calSlotsCache[key];
+    if (!daySlots || daySlots.length === 0) return false;
+    return daySlots.some(function(slot) { return isSlotBookable(slot.start); });
+  }
+
+  // ── Fetch slots from Cal.com proxy for the visible month ──
+  async function fetchCalSlots() {
+    if (calLoading) return;
+    calLoading = true;
+    const year = viewMonth.getFullYear();
+    const month = String(viewMonth.getMonth() + 1).padStart(2, '0');
+    const daysInMonth = new Date(year, viewMonth.getMonth() + 1, 0).getDate();
+    const start = year + '-' + month + '-01';
+    const end = year + '-' + month + '-' + String(daysInMonth).padStart(2, '0');
+    const eventType = getEventTypeId();
+    try {
+      const res = await fetch('/api/slots?eventTypeKeyword=' + eventType + '&start=' + start + '&end=' + end);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (data && data.slots) calSlotsCache = data.slots;
+    } catch (err) {
+      console.warn('Cal.com fetch failed, using fallback:', err.message);
+      calSlotsCache = {};
+    } finally {
+      calLoading = false;
+    }
+  }
 
   function renderCalendar() {
     const grid = document.getElementById('cal-grid');
@@ -1127,6 +1226,7 @@
       grid.appendChild(el);
     });
 
+    const hasCalData = Object.keys(calSlotsCache).length > 0;
     document.getElementById('cal-month').innerHTML = `${monthNames[viewMonth.getMonth()]} <em>${viewMonth.getFullYear()}</em>`;
 
     const firstDay = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1).getDay();
@@ -1149,7 +1249,12 @@
       if (isPast(date)) {
         el.classList.add('disabled');
         el.disabled = true;
-      } else if (isFullyBooked(date)) {
+      } else if (date.getDay() === 0) {
+        // Sundays — always closed
+        el.classList.add('disabled');
+        el.disabled = true;
+      } else if (hasCalData && !hasAvailableSlots(date)) {
+        // Cal.com confirmed no available slots
         el.classList.add('disabled');
         el.disabled = true;
       } else {
@@ -1172,18 +1277,21 @@
     );
   }
 
-  document.getElementById('cal-prev').addEventListener('click', () => {
+  document.getElementById('cal-prev').addEventListener('click', async () => {
     viewMonth.setMonth(viewMonth.getMonth() - 1);
+    await fetchCalSlots();
     renderCalendar();
   });
-  document.getElementById('cal-next').addEventListener('click', () => {
+  document.getElementById('cal-next').addEventListener('click', async () => {
     viewMonth.setMonth(viewMonth.getMonth() + 1);
+    await fetchCalSlots();
     renderCalendar();
   });
 
   function selectDate(date, el) {
     state.date = date;
     state.time = null;
+    state.calStart = null;
     document.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
     el.classList.add('selected');
     renderTimeSlots(date);
@@ -1191,8 +1299,16 @@
     document.getElementById('next-2').disabled = true;
   }
 
-  // mocked time slots — in production these come from Cal.com availability
-  const allSlots = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM'];
+  // ── Format ISO time to 12-hour display in Eastern Time ──
+  function formatSlotTime(isoStr) {
+    return new Date(isoStr).toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
   function renderTimeSlots(date) {
     const wrap = document.getElementById('timeslots');
     const grid = document.getElementById('slot-grid');
@@ -1201,28 +1317,55 @@
       `Available times for <em>${monthNames[date.getMonth()]} ${date.getDate()}</em>`;
     grid.innerHTML = '';
 
-    // mock: random 3-4 slots booked per day
-    const seed = date.getDate();
-    const bookedIdx = [(seed*3)%10, (seed*5+1)%10, (seed*7+2)%10];
+    const key = date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
+    const daySlots = calSlotsCache[key];
 
-    allSlots.forEach((time, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'slot';
-      btn.textContent = time;
-      if (bookedIdx.includes(i)) {
-        btn.classList.add('disabled');
-        btn.disabled = true;
-      } else {
+    // Render available slots from Cal.com, or fallback to standard times
+    if (daySlots && daySlots.length > 0) {
+      daySlots.forEach(slot => {
+        if (!isSlotBookable(slot.start)) return; // skip slots outside hours / 5h-rule
+        const btn = document.createElement('button');
+        btn.className = 'slot';
+        btn.textContent = formatSlotTime(slot.start) + ' ET';
+        btn.dataset.isoStart = slot.start;
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot.selected').forEach(s => s.classList.remove('selected'));
+          btn.classList.add('selected');
+          state.time = btn.textContent;
+          state.calStart = slot.start;
+          updateSummary();
+          document.getElementById('next-2').disabled = false;
+        });
+        grid.appendChild(btn);
+      });
+    } else {
+      // Fallback: standard time slots (when Cal.com not configured)
+      const now = new Date();
+      const fallbackSlots = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM'];
+      fallbackSlots.forEach(time => {
+        // Apply 5-hour rule to fallback slots too when same day (Florida timezone)
+        const slotDate = new Date(date.toDateString() + ' ' + time);
+        const isTodayFL = getFLDateStr(date) === getFLDateStr(now);
+        if (isTodayFL) {
+          const minStart = new Date(now.getTime() + 5 * 3600000);
+          if (slotDate < minStart) return;
+        }
+        const btn = document.createElement('button');
+        btn.className = 'slot';
+        btn.textContent = time;
         btn.addEventListener('click', () => {
           document.querySelectorAll('.slot.selected').forEach(s => s.classList.remove('selected'));
           btn.classList.add('selected');
           state.time = time;
+          state.calStart = null;
           updateSummary();
           document.getElementById('next-2').disabled = false;
         });
-      }
-      grid.appendChild(btn);
-    });
+        grid.appendChild(btn);
+      });
+    }
   }
 
   document.getElementById('next-2').addEventListener('click', () => goToStep(3));
@@ -1309,8 +1452,10 @@
       city: document.getElementById('f-city').value,
       zip: document.getElementById('f-zip').value,
       notes: document.getElementById('f-notes').value,
-      callTime: document.getElementById('f-call-time').value
     };
+    // Manual referral code overrides URL parameter
+    const manualRef = document.getElementById('f-ref-code').value.trim();
+    if (manualRef) state.referredBy = manualRef;
     renderConfirmDetails();
     updateSummary();
     goToStep(4);
@@ -1324,10 +1469,8 @@
       ? monthNames[state.date.getMonth()] + ' ' + state.date.getDate() + ', ' + state.date.getFullYear()
       : '';
 
-    const callTimeRow = isVideo
-      ? '<div class="conf-row"><div class="lbl">Preferred Call Time</div><div class="val">' + d.callTime + '</div></div>'
-      : '<div class="conf-row"><div class="lbl">Date</div><div class="val">' + dateStr + '</div></div>' +
-        '<div class="conf-row"><div class="lbl">Time</div><div class="val">' + state.time + '</div></div>';
+    const callTimeRow = '<div class="conf-row"><div class="lbl">Date</div><div class="val">' + dateStr + '</div></div>' +
+      '<div class="conf-row"><div class="lbl">Time</div><div class="val">' + state.time + '</div></div>';
 
     const addressRow = !isVideo
       ? '<div class="conf-row"><div class="lbl">Address</div><div class="val">' + d.address + '<br/>' + d.city + ', FL ' + d.zip + '</div></div>'
@@ -1386,9 +1529,10 @@
       phone:     d.phone,
       address:   isVideo ? 'N/A (Video)' : `${d.address}, ${d.city}, FL ${d.zip}`,
       treatment: isVideo ? 'video-consultation' : 'komfort-flow',
-      date:      isVideo ? `Preferred Call Time: ${d.callTime}` : `${state.date.toDateString()} at ${state.time}`,
+      date:      isVideo ? `Video Consultation: ${state.time}` : `${state.date.toDateString()} at ${state.time}`,
+      calStart:  state.calStart || '',
+      referredBy: state.referredBy || '',
       notes:     d.notes,
-      callTime:  isVideo ? d.callTime : undefined,
       travelFee: state.travelFee,
       guests: isVideo ? 1 : state.guests,
       groupDiscount: (!isVideo && state.guests >= 2) ? String((state.treatment.price * state.guests * 0.2).toFixed(2)) : '0'

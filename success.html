@@ -243,9 +243,12 @@
       </div>
     </div>
 
+    <div id="referral-wrap"></div>
+
     <div class="divider"></div>
 
     <a href="/" class="btn">Back to Ruta Naturals →</a>
+    <a href="/refer" class="btn" style="background:transparent;color:var(--forest);border:1px solid var(--forest);margin-top:0.5rem;">Refer &amp; Earn Rewards →</a>
 
     <div class="contact">
       Questions? Call or text <a href="tel:8885525752">(888) 552-5752</a><br/>
@@ -326,6 +329,43 @@
         <div class="next-steps">${nextStepMsg}</div>
         <div class="email-note">A receipt has been sent to <strong>${data.email}</strong> by Stripe.</div>
       `;
+
+      // ── Referral section ──
+      renderReferral(data);
+    }
+
+    function renderReferral(data) {
+      const div = document.getElementById('referral-wrap');
+      let html = '';
+
+      // Referral link to share
+      if (data.referralCode) {
+        const baseUrl = window.location.origin;
+        const refLink = baseUrl + '/book.html?ref=' + data.referralCode;
+        html += '<div style="margin-top:1.5rem;padding:1.2rem 1.4rem;background:rgba(184,103,74,0.08);border-left:3px solid var(--terracotta);border-radius:6px;text-align:left;">' +
+          '<p style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--terracotta);margin-bottom:0.5rem;font-weight:500;">🎁 Refer &amp; earn rewards</p>' +
+          '<p style="font-size:0.85rem;color:var(--ink-soft);margin-bottom:0.6rem;">Share this link with friends. When they book, you both get a discount!</p>' +
+          '<div style="background:var(--pearl);border:1px solid rgba(45,58,42,0.12);border-radius:6px;padding:0.6rem 0.8rem;font-family:monospace;font-size:0.85rem;color:var(--forest);word-break:break-all;cursor:pointer;" onclick="navigator.clipboard.writeText(\'' + refLink + '\');this.textContent=\'✓ Copied!\';setTimeout(()=>this.textContent=\'' + refLink + '\',2000);">' + refLink + '</div>' +
+          '</div>';
+      }
+
+      // Coupons earned
+      const coupons = data.coupons || {};
+      const couponCodes = Object.keys(coupons);
+      if (couponCodes.length > 0) {
+        couponCodes.forEach(function(code) {
+          const c = coupons[code];
+          if (!c.used) {
+            html += '<div style="margin-top:0.8rem;padding:1rem 1.3rem;background:var(--pearl);border:2px dashed var(--sage);border-radius:8px;text-align:center;">' +
+              '<p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--sage-deep);margin-bottom:0.3rem;">' + (c.type === 'welcome' ? 'Welcome gift' : 'Referral reward') + '</p>' +
+              '<p style="font-family:monospace;font-size:1.3rem;color:var(--forest);letter-spacing:0.08em;margin-bottom:0.2rem;">' + code + '</p>' +
+              '<p style="font-size:0.82rem;color:var(--terracotta);font-weight:500;">$' + (c.amountCents / 100).toFixed(0) + ' off your next booking</p>' +
+              '</div>';
+          }
+        });
+      }
+
+      div.innerHTML = html;
     }
 
     function renderFallback() {
@@ -346,6 +386,7 @@
         if (!res.ok) throw new Error('not found');
         const data = await res.json();
         renderSummary(data);
+        renderReferral(data);
       } catch {
         renderFallback();
       }

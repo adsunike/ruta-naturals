@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refer & Earn — Ruta Naturals</title>
+  <meta name="description" content="Share Ruta Naturals with friends and earn rewards. Refer a friend, you both get discounts on your next session." />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://rutanaturals.com/refer" />
+  <meta property="og:title" content="Refer & Earn — Ruta Naturals" />
+  <meta property="og:description" content="Share Ruta Naturals with friends and earn rewards on every referral." />
+  <meta property="og:image" content="/hero.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --cream: #f4ede1; --cream-deep: #ebe1cf;
+      --sage: #8a9a7b; --sage-deep: #5b6e52;
+      --forest: #2d3a2a; --terracotta: #b8674a;
+      --terracotta-soft: #d49278; --ink: #1f1d18;
+      --ink-soft: #4a463d; --pearl: #fbf7ee;
+      --gold: #a88a4a;
+      --serif: 'Cormorant Garamond', 'Fraunces', Georgia, serif;
+      --display: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--sans); background: var(--cream);
+      color: var(--ink); font-weight: 300; line-height: 1.6;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 999;
+      opacity: 0.06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    h1, h2, h3 { font-family: var(--display); font-weight: 300; }
+    em { font-family: var(--serif); font-style: italic; color: var(--terracotta); }
+    .eyebrow {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.32em;
+      color: var(--sage-deep); font-weight: 500;
+    }
+
+    /* ── nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.5rem 3rem; display: flex; justify-content: space-between;
+      align-items: center; background: var(--cream);
+      border-bottom: 1px solid rgba(45,58,42,0.08);
+    }
+    .logo img { height: 60px; width: auto; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+    .nav-links a {
+      text-decoration: none; color: var(--ink); font-size: 0.78rem;
+      text-transform: uppercase; letter-spacing: 0.18em; font-weight: 400;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.9rem 1.8rem; background: var(--forest); color: var(--cream);
+      text-decoration: none; font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      border-radius: 999px; transition: all 0.3s ease; border: none; cursor: pointer;
+    }
+    .btn:hover { background: var(--terracotta); transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--forest); border: 1px solid var(--forest); }
+    .btn-outline:hover { background: var(--forest); color: var(--cream); }
+
+    /* ── container ── */
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 0 2rem; }
+
+    /* ── hero ── */
+    .hero {
+      padding: 10rem 0 5rem; text-align: center;
+      background: linear-gradient(180deg, var(--cream-deep) 0%, var(--cream) 100%);
+    }
+    .hero h1 { font-size: clamp(2.5rem, 5vw, 3.8rem); line-height: 1.05; margin: 1rem 0 0.8rem; }
+    .hero p { color: var(--ink-soft); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    /* ── sections ── */
+    section { padding: 5rem 0; }
+    section h2 {
+      font-size: 2rem; text-align: center; margin-bottom: 0.5rem;
+    }
+    section .sub {
+      text-align: center; color: var(--ink-soft); margin-bottom: 3rem;
+    }
+
+    /* ── how it works steps ── */
+    .steps { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    .step-card {
+      flex: 1; min-width: 220px; max-width: 300px;
+      background: var(--pearl); border-radius: 12px; padding: 2rem 1.8rem;
+      text-align: center; border: 1px solid rgba(45,58,42,0.06);
+      box-shadow: 0 10px 30px rgba(45,58,42,0.04);
+    }
+    .step-num {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--sage); color: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+      font-family: var(--display); font-size: 1.3rem;
+    }
+    .step-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .step-card p { font-size: 0.9rem; color: var(--ink-soft); }
+    .step-arrow { font-size: 1.5rem; color: var(--terracotta-soft); align-self: center; }
+
+    /* ── rewards table ── */
+    .rewards-grid {
+      display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+    }
+    .reward-card {
+      flex: 1; min-width: 240px; max-width: 360px;
+      background: var(--pearl); border-radius: 12px; padding: 2rem;
+      text-align: center; border: 1px solid rgba(45,58,42,0.06);
+    }
+    .reward-card .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .reward-card h3 { font-size: 1.3rem; }
+    .reward-card .amount {
+      font-family: var(--display); font-size: 2rem; color: var(--terracotta);
+      margin: 0.5rem 0;
+    }
+    .reward-card p { font-size: 0.88rem; color: var(--ink-soft); }
+    .reward-card.highlight { border: 2px solid var(--terracotta-soft); }
+
+    /* ── diagram ── */
+    .diagram {
+      background: var(--forest); border-radius: 16px; padding: 3rem;
+      text-align: center; color: var(--cream);
+    }
+    .diagram h2 { color: var(--cream); }
+    .diagram-flow {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1.5rem; flex-wrap: wrap; margin-top: 2.5rem;
+    }
+    .diag-step {
+      background: rgba(244,237,225,0.08); border-radius: 10px;
+      padding: 1.5rem; min-width: 160px; flex: 1; max-width: 240px;
+    }
+    .diag-step .diag-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .diag-step p { font-size: 0.85rem; color: rgba(244,237,225,0.8); }
+    .diag-step strong { color: var(--terracotta-soft); }
+    .diag-arrow { font-size: 1.8rem; color: var(--terracotta-soft); }
+
+    /* ── check credits ── */
+    .lookup-box {
+      max-width: 500px; margin: 0 auto;
+      background: var(--pearl); padding: 2.5rem;
+      border-radius: 12px; border: 1px solid rgba(45,58,42,0.06);
+      text-align: center;
+    }
+    .lookup-box p { font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 1.2rem; }
+    .lookup-row { display: flex; gap: 0.8rem; }
+    .lookup-row input {
+      flex: 1; padding: 0.8rem 1rem; border: 1px solid rgba(45,58,42,0.15);
+      border-radius: 8px; font-family: var(--sans); font-size: 0.9rem;
+      background: var(--cream); outline: none;
+    }
+    .lookup-row input:focus { border-color: var(--sage); }
+
+    /* ── results ── */
+    #lookup-results { margin-top: 1.5rem; text-align: left; }
+    .result-summary {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+    }
+    .result-stat {
+      background: var(--cream); border-radius: 8px; padding: 0.8rem 1.2rem;
+      text-align: center; flex: 1; min-width: 120px;
+    }
+    .result-stat .num {
+      font-family: var(--display); font-size: 1.4rem; color: var(--forest);
+    }
+    .result-stat .lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ink-soft); }
+    .result-coupon {
+      background: var(--cream); border-radius: 6px; padding: 0.8rem 1rem;
+      margin-bottom: 0.5rem; display: flex; justify-content: space-between;
+      align-items: center; border-left: 3px solid var(--sage);
+    }
+    .result-coupon .code { font-family: monospace; font-size: 0.9rem; }
+    .result-coupon .used { opacity: 0.4; text-decoration: line-through; }
+    .result-none { color: var(--ink-soft); font-size: 0.9rem; text-align: center; padding: 1rem; }
+    .error-msg { color: var(--terracotta); font-size: 0.85rem; margin-top: 0.5rem; }
+
+    /* ── FAQ ── */
+    .faq-item { margin-bottom: 1rem; }
+    .faq-q {
+      font-weight: 500; color: var(--forest); cursor: pointer;
+      padding: 0.8rem 1rem; background: var(--pearl); border-radius: 6px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq-q:hover { background: rgba(138,154,123,0.1); }
+    .faq-a {
+      padding: 0.8rem 1rem; color: var(--ink-soft); font-size: 0.9rem;
+      display: none; line-height: 1.7;
+    }
+    .faq-a.open { display: block; }
+
+    /* ── footer ── */
+    footer {
+      background: var(--forest); color: rgba(244,237,225,0.7);
+      text-align: center; padding: 3rem; font-size: 0.85rem;
+    }
+    footer a { color: var(--terracotta-soft); text-decoration: none; }
+
+    @media (max-width: 700px) {
+      nav { padding: 1rem 1.5rem; }
+      .hero { padding: 7rem 0 3rem; }
+      .step-card, .reward-card { min-width: 100%; }
+      .diagram-flow { flex-direction: column; }
+      .diag-arrow { transform: rotate(90deg); }
+      .lookup-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <nav>
+    <a href="/" class="logo"><img src="logo.png" alt="Ruta Naturals" style="height:60px;"></a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/book.html">Book Now</a></li>
+    </ul>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Share the wellness</div>
+      <h1>Refer &amp; <em>Earn</em></h1>
+      <p>Love Ruta's work? Share it with a friend. When they book, <strong>you both get rewarded.</strong></p>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section>
+    <div class="wrap">
+      <h2>How it <em>works</em></h2>
+      <p class="sub">Three simple steps to earn rewards</p>
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Book a session</h3>
+          <p>Complete your first booking and you'll get a unique referral link on your confirmation page.</p>
+        </div>
+        <div style="font-size:2rem;color:var(--terracotta-soft);align-self:center;">→</div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Share your link</h3>
+          <p>Send your referral link to friends via text, email, or social media. It takes seconds.</p>
+        </div>
+        <div style="font-size:2rem;color:var(--terracotta-soft);align-self:center;">→</div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Both earn rewards</h3>
+          <p>When a friend books using your link, you both get a coupon code for your next session.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VISUAL DIAGRAM ============ -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="diagram">
+        <h2>The flow at a <em style="color:var(--terracotta-soft);">glance</em></h2>
+        <div class="diagram-flow">
+          <div class="diag-step">
+            <div class="diag-icon">🎁</div>
+            <p><strong>You</strong> get a referral link after booking</p>
+          </div>
+          <div class="diag-arrow">→</div>
+          <div class="diag-step">
+            <div class="diag-icon">📤</div>
+            <p>You <strong>share</strong> the link with a friend</p>
+          </div>
+          <div class="diag-arrow">→</div>
+          <div class="diag-step">
+            <div class="diag-icon">📅</div>
+            <p>Friend <strong>books</strong> a session using your link</p>
+          </div>
+          <div class="diag-arrow">→</div>
+          <div class="diag-step">
+            <div class="diag-icon">✉️</div>
+            <p><strong>Both</strong> get coupon codes via email</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REWARDS ============ -->
+  <section style="background: var(--cream-deep);">
+    <div class="wrap">
+      <h2>What you <em>earn</em></h2>
+      <p class="sub">Everyone wins when you refer</p>
+      <div class="rewards-grid">
+        <div class="reward-card highlight">
+          <div class="icon">🎉</div>
+          <h3>You (the referrer)</h3>
+          <div class="amount" id="ref-amount">$25</div>
+          <p>Coupon for your next session when your friend books. Use it toward any service.</p>
+        </div>
+        <div class="reward-card">
+          <div class="icon">👋</div>
+          <h3>Your friend</h3>
+          <div class="amount" id="welcome-amount">$10</div>
+          <p>Welcome coupon for their next session after their first booking. A thank-you for trying Ruta.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section>
+    <div class="wrap">
+      <h2>Frequently asked <em>questions</em></h2>
+      <p class="sub">Everything you need to know about referring</p>
+      <div style="max-width:600px;margin:0 auto;">
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.nextElementSibling.classList.toggle('open')">
+            How do I get my referral link? <span style="font-size:1.2rem;">+</span>
+          </div>
+          <div class="faq-a">After you complete a booking, your unique referral link appears on the confirmation page (success page). You can copy it and share it anywhere.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.nextElementSibling.classList.toggle('open')">
+            How do I use my coupon code? <span style="font-size:1.2rem;">+</span>
+          </div>
+          <div class="faq-a">When a friend books using your link, we email your coupon code. On your next booking, simply enter the code in the "Referral code" field on the booking form and your discount will be applied.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.nextElementSibling.classList.toggle('open')">
+            Is there a limit to how many friends I can refer? <span style="font-size:1.2rem;">+</span>
+          </div>
+          <div class="faq-a">No limit! Refer as many friends as you like. You'll earn a coupon for every friend who books. Check your credits below to see your balance.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.nextElementSibling.classList.toggle('open')">
+            Can I use multiple coupon codes? <span style="font-size:1.2rem;">+</span>
+          </div>
+          <div class="faq-a">One coupon per booking. But if you have multiple credits, they accumulate — use them one at a time across your future sessions.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CREDIT LOOKUP ============ -->
+  <section style="background: var(--cream-deep);">
+    <div class="wrap">
+      <h2>Check your <em>credits</em></h2>
+      <p class="sub">Enter your email to see your referral coupons and balance</p>
+      <div class="lookup-box">
+        <p>We'll look up all referral coupons linked to your email.</p>
+        <div class="lookup-row">
+          <input type="email" id="lookup-email" placeholder="Your email address" />
+          <button class="btn" id="lookup-btn">Check →</button>
+        </div>
+        <div id="lookup-results"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section style="text-align:center;">
+    <div class="wrap">
+      <h2>Ready to <em>start?</em></h2>
+      <p class="sub" style="margin-bottom:2rem;">Book your first session and get your referral link today.</p>
+      <a href="/book.html" class="btn" style="font-size:0.9rem;padding:1rem 2.5rem;">Book a Session →</a>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <p>© 2026 Ruta Naturals. Licensed FL & IL · Insured</p>
+    <p style="margin-top:0.5rem;"><a href="/">Home</a> · <a href="/book.html">Book</a></p>
+  </footer>
+
+  <script>
+    // ── Credit lookup ──
+    document.getElementById('lookup-btn').addEventListener('click', async function() {
+      const email = document.getElementById('lookup-email').value.trim();
+      const results = document.getElementById('lookup-results');
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        results.innerHTML = '<div class="error-msg">Please enter a valid email address.</div>';
+        return;
+      }
+      results.innerHTML = 'Looking up...';
+      try {
+        const res = await fetch('/api/referral-lookup?email=' + encodeURIComponent(email));
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        let html = '<div class="result-summary">' +
+          '<div class="result-stat"><div class="num">$' + (data.totalEarnedCents / 100).toFixed(0) + '</div><div class="lbl">Earned</div></div>' +
+          '<div class="result-stat"><div class="num">$' + (data.totalAvailableCents / 100).toFixed(0) + '</div><div class="lbl">Available</div></div>' +
+          '<div class="result-stat"><div class="num">' + data.coupons.length + '</div><div class="lbl">Coupons</div></div>' +
+          '</div>';
+        if (data.coupons.length === 0) {
+          html += '<div class="result-none">No referral coupons found for this email. Book a session to get started!</div>';
+        } else {
+          data.coupons.forEach(function(c) {
+            html += '<div class="result-coupon' + (c.used ? ' used"' : '"') + '>' +
+              '<span><strong class="code">' + c.code + '</strong><br/><span style="font-size:0.78rem;color:var(--ink-soft);">' +
+              (c.type === 'welcome' ? 'Welcome gift' : 'Referral reward') +
+              (c.used ? ' · Used' : '') + '</span></span>' +
+              '<span style="font-family:var(--display);color:var(--terracotta);">$' + (c.amountCents / 100).toFixed(0) + '</span>' +
+              '</div>';
+          });
+        }
+        if (data.referralCode) {
+          html += '<div style="margin-top:1rem;padding:0.8rem;background:var(--cream);border-radius:6px;font-size:0.85rem;text-align:center;">Your referral link: <strong>' + data.referralCode + '</strong></div>';
+        }
+        results.innerHTML = html;
+      } catch (err) {
+        results.innerHTML = '<div class="error-msg">' + err.message + '</div>';
+      }
+    });
+    document.getElementById('lookup-email').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('lookup-btn').click();
+    });
+
+    // ── Load amounts from env (fetched via /api/referral-lookup as demo) ──
+    // Static amounts shown by default; they update live when user checks their email.
+  </script>
+</body>
+</html>
