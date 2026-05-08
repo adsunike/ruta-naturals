@@ -32,6 +32,18 @@
       "dest": "/server.js"
     },
     {
+      "src": "/refer",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
