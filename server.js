@@ -1,18 +1,28 @@
 require('dotenv').config();
-const express = require('express');
-const path    = require('path');
-const fs      = require('fs');
-const stripe  = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
+const express  = require('express');
+const path     = require('path');
+const fs       = require('fs');
+const crypto   = require('crypto');
+const stripe   = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const nodemailer = require('nodemailer');
 
 const app  = express();
 const PORT = process.env.PORT || 3002;
 
-// ── Email Transporter Setup ────────────────────────────────────────────────
+// ── Error Monitoring (Sentry) ──────────────────────────────────────────────
+let Sentry;
+try { Sentry = require('@sentry/node'); } catch { /* not installed */ }
+if (Sentry && process.env.SENTRY_DSN) {
+  Sentry.init({ dsn: process.env.SENTRY_DSN });
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.errorHandler());
+  console.log('📊 Sentry error monitoring enabled');
+}
+
+// ── Email Transporter ─────────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT || 465,
+  port: Number(process.env.SMTP_PORT) || 465,
   secure: true,
   auth: {
     user: process.env.SMTP_USER,
@@ -20,56 +30,152 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ── Booking Store (JSON file — swap to Vercel KV / DB for production) ──────
+// ── Storage Layer (Vercel KV when available, async JSON file as fallback) ─
+const USE_KV = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+let kv;
+if (USE_KV) {
+  const { Redis } = require('@upstash/redis');
+  kv = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  console.log('🗄️  Using Upstash Redis for storage');
+} else {
+  console.log('🗄️  Using local JSON file for storage (dev mode)');
+}
+
 const BOOKINGS_PATH = path.join(__dirname, 'bookings.json');
-let bookingsCache = null;
 
-function loadBookings() {
-  if (bookingsCache) return bookingsCache;
+async function getAllBookings() {
+  if (USE_KV) {
+    const ids = await kv.lrange('booking_ids', 0, -1);
+    if (!ids || ids.length === 0) return [];
+    const bookings = await Promise.all(ids.map(id => kv.get(`booking:${id}`)));
+    return bookings.filter(Boolean);
+  }
   try {
-    if (fs.existsSync(BOOKINGS_PATH)) {
-      bookingsCache = JSON.parse(fs.readFileSync(BOOKINGS_PATH, 'utf-8'));
-    } else {
-      bookingsCache = [];
+    if (!fs.existsSync(BOOKINGS_PATH)) return [];
+    const data = await fs.promises.readFile(BOOKINGS_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+async function addBooking(data) {
+  if (USE_KV) {
+    try {
+      const exists = await kv.exists(`booking:${data.id}`);
+      if (exists) return false;
+      await kv.set(`booking:${data.id}`, data);
+      await kv.lpush('booking_ids', data.id);
+      return true;
+    } catch (err) {
+      console.error('❌ KV write error (addBooking):', err.message);
+      return false;
     }
-  } catch (e) {
-    console.error('Failed to load bookings:', e.message);
-    bookingsCache = [];
   }
-  return bookingsCache;
-}
-
-function saveBookings() {
   try {
-    fs.writeFileSync(BOOKINGS_PATH, JSON.stringify(bookingsCache, null, 2));
-  } catch (e) {
-    console.error('Failed to save bookings:', e.message);
+    const all = await getAllBookings();
+    if (all.find(b => b.id === data.id)) return false;
+    all.push(data);
+    await fs.promises.writeFile(BOOKINGS_PATH, JSON.stringify(all, null, 2));
+    return true;
+  } catch (err) {
+    console.error('❌ File write error (addBooking):', err.message);
+    return false;
   }
 }
 
-function addBooking(data) {
-  loadBookings();
-  if (bookingsCache.find(b => b.id === data.id)) return false;
-  bookingsCache.push(data);
-  saveBookings();
+async function updateBooking(id, updates) {
+  if (USE_KV) {
+    try {
+      const booking = await kv.get(`booking:${id}`);
+      if (!booking) return null;
+      const updated = { ...booking, ...updates };
+      await kv.set(`booking:${id}`, updated);
+      return updated;
+    } catch (err) {
+      console.error('❌ KV write error (updateBooking):', err.message);
+      return null;
+    }
+  }
+  try {
+    const all = await getAllBookings();
+    const idx = all.findIndex(b => b.id === id);
+    if (idx === -1) return null;
+    all[idx] = { ...all[idx], ...updates };
+    await fs.promises.writeFile(BOOKINGS_PATH, JSON.stringify(all, null, 2));
+    return all[idx];
+  } catch (err) {
+    console.error('❌ File write error (updateBooking):', err.message);
+    return null;
+  }
+}
+
+async function getNextBookingNumber() {
+  if (USE_KV) {
+    try {
+      return await kv.incr('booking_count');
+    } catch (err) {
+      console.error('❌ KV incr error:', err.message);
+      return Date.now(); // fallback: use timestamp as unique number
+    }
+  }
+  const all = await getAllBookings();
+  return all.length + 1;
+}
+
+// ── Admin Auth ─────────────────────────────────────────────────────────────
+// In-memory rate limiter: max 5 failed attempts per 15 min per IP
+const loginAttempts = new Map();
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const WINDOW = 15 * 60 * 1000;
+  const MAX = 5;
+  const record = loginAttempts.get(ip);
+  if (!record || now > record.resetAt) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + WINDOW });
+    return true;
+  }
+  if (record.count >= MAX) return false;
+  record.count++;
   return true;
 }
 
-function updateBooking(id, updates) {
-  loadBookings();
-  const idx = bookingsCache.findIndex(b => b.id === id);
-  if (idx === -1) return null;
-  bookingsCache[idx] = { ...bookingsCache[idx], ...updates };
-  saveBookings();
-  return bookingsCache[idx];
+function timingSafeEqual(a, b) {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  if (bufA.length !== bufB.length) {
+    crypto.timingSafeEqual(bufA, Buffer.alloc(bufA.length));
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
 }
 
-// ── Stripe webhook (MUST be before express.json) ───────────────────────────
-// Set STRIPE_WEBHOOK_SECRET in .env and point the Stripe dashboard to /webhook
+function requireAdmin(req, res, next) {
+  const pw = process.env.ADMIN_PASSWORD;
+  if (!pw) return res.status(500).json({ error: 'ADMIN_PASSWORD not configured' });
+
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const auth = req.headers.authorization;
+  const token = auth?.startsWith('Bearer ') ? auth.slice(7) : '';
+
+  if (!timingSafeEqual(token, pw)) {
+    if (!checkRateLimit(ip)) {
+      return res.status(429).json({ error: 'Too many failed attempts. Try again in 15 minutes.' });
+    }
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
+// ── Stripe Webhook (MUST be before express.json) ───────────────────────────
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig    = req.headers['stripe-signature'];
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret) return res.sendStatus(200);          // skip if not configured
+  if (!secret) return res.sendStatus(200);
 
   let event;
   try {
@@ -83,7 +189,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     const session = event.data.object;
     const meta = session.metadata;
     const isVideo = meta.treatment && meta.treatment.includes('video-consultation');
-    console.log('✅ Payment completed:', meta.treatment);
 
     const adminSubject = isVideo
       ? `New Video Consultation — ${meta.firstName} ${meta.lastName} · ${meta.date}`
@@ -139,7 +244,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           <p><strong>Address:</strong> ${meta.address}</p>
           <p><strong>Deposit Paid:</strong> $25.00</p>
           ${meta.guests && meta.guests !== '1' ? `<p><strong>Guests:</strong> ${meta.guests} people &mdash; 20% group discount applied ($160/person)</p>` : ''}
-          ${meta.travelFee && meta.travelFee !== '0' ? `<p><strong>Travel Fee:</strong> $${''}${meta.travelFee} (collected at visit)</p>` : ''}
+          ${meta.travelFee && meta.travelFee !== '0' ? `<p><strong>Travel Fee:</strong> $${meta.travelFee} (collected at visit)</p>` : ''}
           <p><strong>Balance at Visit:</strong> $${((Number(meta.guests || 1) * (meta.guests !== '1' ? 160 : 200)) - 25 + Number(meta.travelFee || 0)).toFixed(2)}</p>
         </div>
         <p>Ruta will confirm your appointment personally within a few hours. See you soon.</p>
@@ -149,12 +254,19 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
     try {
       if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        await transporter.sendMail({
-          from: `"Ruta Naturals Booking" <${process.env.SMTP_USER}>`,
-          to: ['rutanaturalle@gmail.com', 'adsunike@gmail.com'],
-          subject: adminSubject,
-          html: adminBody,
-        });
+        const adminRecipients = [
+          process.env.ADMIN_EMAIL_1,
+          process.env.ADMIN_EMAIL_2,
+        ].filter(Boolean);
+
+        if (adminRecipients.length) {
+          await transporter.sendMail({
+            from: `"Ruta Naturals Booking" <${process.env.SMTP_USER}>`,
+            to: adminRecipients,
+            subject: adminSubject,
+            html: adminBody,
+          });
+        }
         await transporter.sendMail({
           from: `"Ruta Naturals" <${process.env.SMTP_USER}>`,
           to: session.customer_email,
@@ -163,18 +275,16 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         });
         console.log('✅ Emails sent for', meta.treatment);
       } else {
-        console.log('⚠️ SMTP not configured. Skipping emails.');
+        console.log('⚠️  SMTP not configured — skipping emails');
       }
     } catch (emailErr) {
       console.error('❌ Email error:', emailErr.message);
     }
 
-    // ── persist booking to local store ──
-    const existing = loadBookings();
-    const count = existing.length;
+    const count = await getNextBookingNumber();
     const bookingData = {
       id: session.id,
-      bookingId: 'RN-' + String(count + 1).padStart(4, '0'),
+      bookingId: 'RN-' + String(count).padStart(4, '0'),
       status: 'pending',
       createdAt: new Date().toISOString(),
       treatment: meta.treatment,
@@ -193,37 +303,28 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       confirmedAt: null,
       cancelledAt: null,
     };
-    addBooking(bookingData);
-    console.log('📦 Booking stored:', bookingData.bookingId);
+    const added = await addBooking(bookingData);
+    if (added) {
+      console.log('📦 Booking stored:', bookingData.bookingId);
+    } else {
+      console.log('⚠️  Duplicate webhook ignored for session:', session.id);
+    }
   }
 
   res.sendStatus(200);
 });
 
-
-// ── middleware ─────────────────────────────────────────────────────────────
+// ── Middleware ────────────────────────────────────────────────────────────
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));   // serve index.html, success.html, etc.
+app.use(express.static(path.join(__dirname)));
 
-// ── Admin auth middleware ──────────────────────────────────────────────────
-function requireAdmin(req, res, next) {
-  const pw = process.env.ADMIN_PASSWORD;
-  if (!pw) return res.status(500).json({ error: 'ADMIN_PASSWORD not configured in .env' });
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith('Bearer ') || auth.slice(7) !== pw) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  next();
-}
-
-// ── Admin API routes ──────────────────────────────────────────────────────
+// ── Admin Routes ──────────────────────────────────────────────────────────
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
-app.get('/api/admin/bookings', requireAdmin, (req, res) => {
-  const all = loadBookings();
-  // Sort most recent first
+app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
+  const all = await getAllBookings();
   all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const statusFilter = req.query.status;
@@ -234,36 +335,35 @@ app.get('/api/admin/bookings', requireAdmin, (req, res) => {
   }
   if (search) {
     filtered = filtered.filter(b =>
-      b.bookingId.toLowerCase().includes(search) ||
-      b.firstName.toLowerCase().includes(search) ||
-      b.lastName.toLowerCase().includes(search) ||
-      b.email.toLowerCase().includes(search)
+      b.bookingId?.toLowerCase().includes(search) ||
+      b.firstName?.toLowerCase().includes(search) ||
+      b.lastName?.toLowerCase().includes(search) ||
+      b.email?.toLowerCase().includes(search)
     );
   }
   res.json({ bookings: filtered, total: all.length });
 });
 
-app.patch('/api/admin/bookings/:id', requireAdmin, (req, res) => {
+app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
   const { status } = req.body;
   if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status. Use: pending, confirmed, cancelled' });
   }
   const updates = { status };
   if (status === 'confirmed') updates.confirmedAt = new Date().toISOString();
-  if (status === 'cancelled') updates.cancelledAt = new Date().toISOString();
-  const booking = updateBooking(req.params.id, updates);
+  if (status === 'cancelled')  updates.cancelledAt = new Date().toISOString();
+  const booking = await updateBooking(req.params.id, updates);
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
   res.json({ booking });
 });
 
-// ── create Stripe Checkout Session ─────────────────────────────────────────
+// ── Stripe Checkout Session ───────────────────────────────────────────────
 app.post('/create-checkout-session', async (req, res) => {
   const {
     firstName, lastName, email, phone,
     address, treatment, date, notes, travelFee, guests, groupDiscount,
   } = req.body;
 
-  // basic server-side validation
   if (!email || !treatment || !date) {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
@@ -272,32 +372,25 @@ app.post('/create-checkout-session', async (req, res) => {
   const isVideo = treatment.includes('video-consultation');
   const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
 
-  // Determine correct Stripe product name and description
   const productName = isVideo
     ? 'Ruta Naturals — Video Consultation'
     : 'Ruta Naturals — Komfort Flow Reset (Deposit)';
   const productDesc = isVideo
-    ? `10-min video call · ${date} · ${firstName} ${lastName}`
+    ? `40-min video call · ${date} · ${firstName} ${lastName}`
     : `Home visit (~60 min) · ${date} · ${firstName} ${lastName}${fee > 0 ? ' · $15 travel fee at visit' : ''}`;
 
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            unit_amount: 2500,   // $25.00 in cents (full for video, deposit for in-home)
-            product_data: {
-              name: productName,
-              description: productDesc,
-              images: [],
-            },
-          },
-          quantity: 1,
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          unit_amount: 2500,
+          product_data: { name: productName, description: productDesc, images: [] },
         },
-      ],
+        quantity: 1,
+      }],
       customer_email: email,
       metadata: {
         firstName, lastName, phone,
@@ -311,16 +404,15 @@ app.post('/create-checkout-session', async (req, res) => {
       success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${baseUrl}/book.html`,
     });
-
     res.json({ url: session.url });
   } catch (err) {
     console.error('Stripe error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Payment setup failed. Please try again.' });
   }
 });
 
 
-// ── session details (used by success.html to personalise the confirmation) ─
+// ── Session Details (used by success.html to personalise the confirmation) ──
 app.get('/session-details', async (req, res) => {
   const { id } = req.query;
   if (!id) return res.status(400).json({ error: 'Missing session id' });
@@ -336,12 +428,11 @@ app.get('/session-details', async (req, res) => {
   }
 });
 
-// ── start ──────────────────────────────────────────────────────────────────
+// ── Start ──────────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production' || require.main === module) {
   app.listen(PORT, () => {
-    console.log(`\n🌿 Ruta Naturals server running → http://localhost:${PORT}\n`);
+    console.log(`\n🌿 Ruta Naturals → http://localhost:${PORT}\n`);
   });
 }
 
-// Export for Vercel serverless deployment
 module.exports = app;

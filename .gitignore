@@ -1,4 +1,7 @@
 node_modules/
+.npm-cache/
 .env
 .DS_Store
 bookings.json
+*.log
+.claude/
